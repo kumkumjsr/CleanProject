@@ -44,10 +44,6 @@ Welcome to EcoSmart 🌱
 
 Your EcoSmart account has been created successfully.
 
-===========================
-Login Details
-===========================
-
 Username : {user.username}
 Email    : {user.email}
 Role     : {user.role}
@@ -64,7 +60,6 @@ EcoSmart Team
                     user.email
                 ],
 
-                # Email fail hone par registration block nahi hoga
                 fail_silently=True
             )
 
@@ -74,6 +69,8 @@ EcoSmart Team
                 "Welcome Email Error:",
                 e
             )
+
+
 
 # ==========================
 # Login API

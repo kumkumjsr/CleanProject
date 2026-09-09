@@ -1,7 +1,5 @@
 
 from rest_framework import serializers
-from django.core.mail import send_mail
-from django.conf import settings
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import User, Salary
@@ -19,6 +17,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         min_length=6
     )
 
+    # Frontend mein confirmation ke liye hai.
+    # Backend mein optional rakha gaya hai.
     confirm_password = serializers.CharField(
         write_only=True,
         required=False
@@ -47,34 +47,59 @@ class RegisterSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-
-        password = attrs.get("password")
-        confirm_password = attrs.get("confirm_password")
-
-        # Confirm password frontend se aaye to check karo
-        if confirm_password and password != confirm_password:
-            raise serializers.ValidationError({
-                "confirm_password": "Passwords do not match."
-            })
-
+        """
+        Password matching frontend par handle ho raha hai.
+        Backend confirm_password ki wajah se registration reject nahi karega.
+        """
         return attrs
 
     def create(self, validated_data):
 
         # confirm_password database mein save nahi hoga
-        validated_data.pop("confirm_password", None)
+        validated_data.pop(
+            "confirm_password",
+            None
+        )
 
-        password = validated_data.pop("password")
+        # Password ko hash karke save karne ke liye
+        # create_user() use kar rahe hain.
+        password = validated_data.pop(
+            "password"
+        )
 
         user = User.objects.create_user(
-            username=validated_data.get("username"),
-            email=validated_data.get("email"),
+
+            username=validated_data.get(
+                "username"
+            ),
+
+            email=validated_data.get(
+                "email"
+            ),
+
             password=password,
-            first_name=validated_data.get("first_name", ""),
-            last_name=validated_data.get("last_name", ""),
-            phone=validated_data.get("phone", ""),
-            address=validated_data.get("address", ""),
-            role=User.CITIZEN,
+
+            first_name=validated_data.get(
+                "first_name",
+                ""
+            ),
+
+            last_name=validated_data.get(
+                "last_name",
+                ""
+            ),
+
+            phone=validated_data.get(
+                "phone",
+                ""
+            ),
+
+            address=validated_data.get(
+                "address",
+                ""
+            ),
+
+            role=User.CITIZEN
         )
 
         return user
@@ -152,72 +177,45 @@ class CreateStaffSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        password = validated_data.pop("password")
+        password = validated_data.pop(
+            "password",
+            None
+        )
 
         staff = User.objects.create_user(
-            username=validated_data["username"],
-            email=validated_data["email"],
+
+            username=validated_data.get(
+                "username"
+            ),
+
+            email=validated_data.get(
+                "email"
+            ),
+
             password=password,
+
             first_name=validated_data.get(
                 "first_name",
                 ""
             ),
+
             last_name=validated_data.get(
                 "last_name",
                 ""
             ),
+
             phone=validated_data.get(
                 "phone",
                 ""
             ),
+
             address=validated_data.get(
                 "address",
                 ""
             ),
-            role=User.WORKER,
+
+            role=User.WORKER
         )
-
-        # Staff welcome email
-        try:
-
-            send_mail(
-                subject="Welcome to EcoSmart Staff Team 🌱",
-
-                message=f"""
-Hello {staff.first_name or staff.username},
-
-Welcome to EcoSmart Staff Team.
-
-Your staff account has been created successfully.
-
-Username:
-{staff.username}
-
-Password:
-{password}
-
-Role:
-WORKER
-
-Regards,
-EcoSmart Team
-""",
-
-                from_email=settings.DEFAULT_FROM_EMAIL,
-
-                recipient_list=[
-                    staff.email
-                ],
-
-                fail_silently=True,
-            )
-
-        except Exception as e:
-
-            print(
-                "Staff Email Error:",
-                e
-            )
 
         return staff
 
@@ -228,13 +226,16 @@ EcoSmart Team
 
 class SalarySerializer(serializers.ModelSerializer):
 
+    # Staff full name
     staff_name = serializers.SerializerMethodField()
 
+    # Staff email
     staff_email = serializers.EmailField(
         source="staff.email",
         read_only=True
     )
 
+    # Automatically calculated net salary
     net_salary = serializers.DecimalField(
         max_digits=10,
         decimal_places=2,
