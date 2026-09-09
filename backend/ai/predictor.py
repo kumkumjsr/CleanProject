@@ -5,15 +5,12 @@ from PIL import Image
 import os
 
 
-# Model path
 MODEL_PATH = os.path.join(
     os.path.dirname(__file__),
     "models",
     "smart_recycling_model1.pth"
 )
 
-
-# Model classes (6 classes)
 CLASSES = [
     "Plastic",
     "Paper",
@@ -23,21 +20,24 @@ CLASSES = [
     "Other"
 ]
 
-
-# Image preprocessing
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
 ])
 
 
-# Load trained model
+model = None
+
+
 def load_model():
 
-    # Your model is ResNet50
+    global model
+
+    if model is not None:
+        return model
+
     model = models.resnet50(weights=None)
 
-    # Last layer according to 6 classes
     model.fc = nn.Linear(
         model.fc.in_features,
         len(CLASSES)
@@ -45,26 +45,21 @@ def load_model():
 
     checkpoint = torch.load(
         MODEL_PATH,
-        map_location=torch.device("cpu")
+        map_location="cpu"
     )
 
     model.load_state_dict(checkpoint)
-
     model.eval()
 
     return model
 
 
-# Load model once
-model = load_model()
-
-
-# Prediction function
 def predict_waste(image):
 
     try:
 
-        # Open image
+        current_model = load_model()
+
         if isinstance(image, str):
             image = Image.open(image)
         else:
@@ -72,16 +67,12 @@ def predict_waste(image):
 
         image = image.convert("RGB")
 
-
-        # Transform image
         image_tensor = transform(image)
         image_tensor = image_tensor.unsqueeze(0)
 
-
-        # Prediction
         with torch.no_grad():
 
-            output = model(image_tensor)
+            output = current_model(image_tensor)
 
             probabilities = torch.softmax(
                 output,
@@ -93,7 +84,6 @@ def predict_waste(image):
                 1
             )
 
-
         waste_type = CLASSES[predicted.item()]
 
         confidence_score = round(
@@ -101,20 +91,17 @@ def predict_waste(image):
             2
         )
 
-
         return {
             "waste_type": waste_type,
             "confidence_score": confidence_score,
             "recommendation": get_recommendation(waste_type)
         }
 
-
     except Exception as e:
 
         return {
             "error": str(e)
         }
-
 
 
 def get_recommendation(waste_type):
@@ -139,7 +126,6 @@ def get_recommendation(waste_type):
         "Other":
             "Dispose this waste properly."
     }
-
 
     return data.get(
         waste_type,
