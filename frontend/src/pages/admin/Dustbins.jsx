@@ -6,7 +6,7 @@ import {
     TileLayer,
     Marker,
     Popup,
-    useMapEvents
+    useMapEvents,
 } from "react-leaflet";
 
 import L from "leaflet";
@@ -14,13 +14,13 @@ import L from "leaflet";
 import {
     Download,
     RefreshCw,
-    QrCode
+    QrCode,
 } from "lucide-react";
 
 import "leaflet/dist/leaflet.css";
 
 // ======================================================
-// FIX LEAFLET MARKER ICON
+// LEAFLET MARKER ICON FIX
 // ======================================================
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -37,6 +37,12 @@ L.Icon.Default.mergeOptions({
 });
 
 // ======================================================
+// PRODUCTION DJANGO BACKEND
+// ======================================================
+
+const BASEURL = "https://cleanproject-b0mh.onrender.com";
+
+// ======================================================
 // MAP LOCATION PICKER
 // ======================================================
 
@@ -45,9 +51,9 @@ function LocationPicker({ position, setPosition }) {
         click(e) {
             setPosition([
                 e.latlng.lat,
-                e.latlng.lng
+                e.latlng.lng,
             ]);
-        }
+        },
     });
 
     return position ? (
@@ -64,10 +70,6 @@ function LocationPicker({ position, setPosition }) {
 // ======================================================
 
 function Dustbins() {
-
-    // Production Django backend
-    const BASEURL = "https://cleanproject-b0mh.onrender.com";
-
     const [dustbins, setDustbins] = useState([]);
 
     const [loading, setLoading] = useState(true);
@@ -85,8 +87,16 @@ function Dustbins() {
         longitude: "",
         address: "",
         is_active: true,
-        is_full: false
+        is_full: false,
     });
+
+    // ==================================================
+    // GET TOKEN
+    // ==================================================
+
+    const getToken = () => {
+        return localStorage.getItem("access");
+    };
 
     // ==================================================
     // FETCH DUSTBINS
@@ -96,37 +106,52 @@ function Dustbins() {
         try {
             setLoading(true);
 
-            const token = localStorage.getItem("access");
+            const token = getToken();
+
+            if (!token) {
+                alert("Please login as admin first.");
+                return;
+            }
 
             const response = await axios.get(
                 `${BASEURL}/api/dustbins/`,
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
             );
 
             setDustbins(response.data);
 
         } catch (error) {
-            console.log(
+            console.error(
                 "Dustbin Fetch Error:",
                 error.response?.data || error
             );
 
             if (error.response?.status === 401) {
-                alert("Session expired. Please login again.");
+                alert(
+                    "Session expired. Please login again."
+                );
             } else if (error.response?.status === 403) {
-                alert("Only admin can manage dustbins.");
+                alert(
+                    "Only admin can manage dustbins."
+                );
             } else {
-                alert("Failed to load dustbins.");
+                alert(
+                    "Failed to load dustbins."
+                );
             }
 
         } finally {
             setLoading(false);
         }
     };
+
+    // ==================================================
+    // LOAD DUSTBINS
+    // ==================================================
 
     useEffect(() => {
         fetchDustbins();
@@ -141,15 +166,16 @@ function Dustbins() {
             name,
             value,
             type,
-            checked
+            checked,
         } = e.target;
 
         setFormData((previous) => ({
             ...previous,
+
             [name]:
                 type === "checkbox"
                     ? checked
-                    : value
+                    : value,
         }));
     };
 
@@ -158,7 +184,6 @@ function Dustbins() {
     // ==================================================
 
     const handleMapLocation = (location) => {
-
         setPosition(location);
 
         setFormData((previous) => ({
@@ -168,7 +193,7 @@ function Dustbins() {
                 location[0].toFixed(6),
 
             longitude:
-                location[1].toFixed(6)
+                location[1].toFixed(6),
         }));
     };
 
@@ -177,8 +202,17 @@ function Dustbins() {
     // ==================================================
 
     const handleSubmit = async (e) => {
-
         e.preventDefault();
+
+        if (!formData.name.trim()) {
+            alert("Please enter dustbin name.");
+            return;
+        }
+
+        if (!formData.address.trim()) {
+            alert("Please enter dustbin address.");
+            return;
+        }
 
         if (!position) {
             alert(
@@ -187,14 +221,36 @@ function Dustbins() {
             return;
         }
 
-        setSaving(true);
+        if (!formData.latitude || !formData.longitude) {
+            alert(
+                "Please select location on map."
+            );
+            return;
+        }
 
         try {
+            setSaving(true);
 
-            const token =
-                localStorage.getItem("access");
+            const token = getToken();
 
-            await axios.post(
+            if (!token) {
+                alert(
+                    "Please login as admin first."
+                );
+                return;
+            }
+
+            console.log(
+                "Creating dustbin at:",
+                `${BASEURL}/api/dustbins/create/`
+            );
+
+            console.log(
+                "Sending data:",
+                formData
+            );
+
+            const response = await axios.post(
                 `${BASEURL}/api/dustbins/create/`,
                 formData,
                 {
@@ -203,15 +259,21 @@ function Dustbins() {
                             `Bearer ${token}`,
 
                         "Content-Type":
-                            "application/json"
-                    }
+                            "application/json",
+                    },
                 }
+            );
+
+            console.log(
+                "Dustbin Created:",
+                response.data
             );
 
             alert(
                 "Dustbin added successfully! ✅"
             );
 
+            // Reset form
             setFormData({
                 name: "",
                 dustbin_type: "General",
@@ -219,7 +281,7 @@ function Dustbins() {
                 longitude: "",
                 address: "",
                 is_active: true,
-                is_full: false
+                is_full: false,
             });
 
             setPosition(null);
@@ -229,27 +291,51 @@ function Dustbins() {
             await fetchDustbins();
 
         } catch (error) {
-
-            console.log(
+            console.error(
                 "Create Dustbin Error:",
                 error
             );
 
-            console.log(
+            console.error(
+                "Status:",
+                error.response?.status
+            );
+
+            console.error(
                 "Backend:",
                 error.response?.data
             );
 
-            alert(
-                error.response?.data?.detail ||
-                error.response?.data?.error ||
-                "Failed to add dustbin"
-            );
+            if (error.response?.status === 401) {
+                alert(
+                    "Unauthorized. Please login again as admin."
+                );
+            } else if (
+                error.response?.status === 403
+            ) {
+                alert(
+                    "Only admin can create dustbins."
+                );
+            } else if (
+                error.response?.data?.detail
+            ) {
+                alert(
+                    error.response.data.detail
+                );
+            } else if (
+                error.response?.data?.error
+            ) {
+                alert(
+                    error.response.data.error
+                );
+            } else {
+                alert(
+                    "Failed to add dustbin."
+                );
+            }
 
         } finally {
-
             setSaving(false);
-
         }
     };
 
@@ -258,11 +344,20 @@ function Dustbins() {
     // ==================================================
 
     const handleRegenerateQR = async (id) => {
-
         try {
+            const token = getToken();
 
-            const token =
-                localStorage.getItem("access");
+            if (!token) {
+                alert(
+                    "Please login as admin first."
+                );
+                return;
+            }
+
+            console.log(
+                "Generating QR:",
+                `${BASEURL}/api/dustbins/${id}/generate-qr/`
+            );
 
             await axios.post(
                 `${BASEURL}/api/dustbins/${id}/generate-qr/`,
@@ -270,8 +365,8 @@ function Dustbins() {
                 {
                     headers: {
                         Authorization:
-                            `Bearer ${token}`
-                    }
+                            `Bearer ${token}`,
+                    },
                 }
             );
 
@@ -282,22 +377,33 @@ function Dustbins() {
             await fetchDustbins();
 
         } catch (error) {
-
-            console.log(
+            console.error(
                 "QR Generate Error:",
                 error
             );
 
-            console.log(
+            console.error(
                 "Backend:",
                 error.response?.data
             );
 
-            alert(
-                error.response?.data?.detail ||
-                error.response?.data?.error ||
-                "Failed to generate QR code"
-            );
+            if (error.response?.status === 401) {
+                alert(
+                    "Unauthorized. Please login again."
+                );
+            } else if (
+                error.response?.status === 403
+            ) {
+                alert(
+                    "Only admin can generate QR code."
+                );
+            } else {
+                alert(
+                    error.response?.data?.detail ||
+                    error.response?.data?.error ||
+                    "Failed to generate QR code."
+                );
+            }
         }
     };
 
@@ -306,18 +412,14 @@ function Dustbins() {
     // ==================================================
 
     const handleDownloadQR = async (dustbin) => {
-
         if (!dustbin.qr_code_url) {
-
             alert(
                 "QR code not available."
             );
-
             return;
         }
 
         try {
-
             const response = await fetch(
                 dustbin.qr_code_url
             );
@@ -332,7 +434,9 @@ function Dustbins() {
                 await response.blob();
 
             const url =
-                window.URL.createObjectURL(blob);
+                window.URL.createObjectURL(
+                    blob
+                );
 
             const link =
                 document.createElement("a");
@@ -340,7 +444,7 @@ function Dustbins() {
             link.href = url;
 
             link.download =
-                `${dustbin.bin_id}.png`;
+                `${dustbin.bin_id || "dustbin"}.png`;
 
             document.body.appendChild(link);
 
@@ -348,11 +452,12 @@ function Dustbins() {
 
             link.remove();
 
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(
+                url
+            );
 
         } catch (error) {
-
-            console.log(
+            console.error(
                 "QR Download Error:",
                 error
             );
@@ -368,22 +473,25 @@ function Dustbins() {
     // ==================================================
 
     if (loading) {
-
         return (
             <div className="p-8">
 
-                <div className="
-                    bg-white
-                    rounded-2xl
-                    shadow
-                    p-10
-                    text-center
-                ">
+                <div
+                    className="
+                        bg-white
+                        rounded-2xl
+                        shadow
+                        p-10
+                        text-center
+                    "
+                >
 
-                    <p className="
-                        text-gray-500
-                        text-lg
-                    ">
+                    <p
+                        className="
+                            text-gray-500
+                            text-lg
+                        "
+                    >
                         Loading dustbins...
                     </p>
 
@@ -398,42 +506,49 @@ function Dustbins() {
     // ==================================================
 
     return (
+        <div
+            className="
+                p-6
+                md:p-8
+                bg-gray-50
+                min-h-screen
+            "
+        >
 
-        <div className="
-            p-6
-            md:p-8
-            bg-gray-50
-            min-h-screen
-        ">
-
-            {/* ==========================================
+            {/* ==================================================
                 HEADER
-            ========================================== */}
+            ================================================== */}
 
-            <div className="
-                flex
-                flex-col
-                md:flex-row
-                md:items-center
-                md:justify-between
-                gap-4
-                mb-8
-            ">
+            <div
+                className="
+                    flex
+                    flex-col
+                    md:flex-row
+                    md:items-center
+                    md:justify-between
+                    gap-4
+                    mb-8
+                "
+            >
 
                 <div>
 
-                    <h1 className="
-                        text-3xl
-                        font-bold
-                        text-gray-800
-                    ">
+                    <h1
+                        className="
+                            text-3xl
+                            font-bold
+                            text-gray-800
+                        "
+                    >
                         🗑️ Dustbins
                     </h1>
 
-                    <p className="
-                        text-gray-500
-                        mt-1
-                    ">
+                    <p
+                        className="
+                            text-gray-500
+                            mt-1
+                        "
+                    >
                         Manage dustbins, locations and QR codes
                     </p>
 
@@ -457,34 +572,36 @@ function Dustbins() {
                 >
                     {showForm
                         ? "✕ Close"
-                        : "＋ Add Dustbin"
-                    }
+                        : "＋ Add Dustbin"}
                 </button>
 
             </div>
 
-            {/* ==========================================
+            {/* ==================================================
                 ADD DUSTBIN FORM
-            ========================================== */}
+            ================================================== */}
 
             {showForm && (
+                <div
+                    className="
+                        bg-white
+                        rounded-2xl
+                        shadow-xl
+                        p-6
+                        mb-8
+                        border
+                        border-green-100
+                    "
+                >
 
-                <div className="
-                    bg-white
-                    rounded-2xl
-                    shadow-xl
-                    p-6
-                    mb-8
-                    border
-                    border-green-100
-                ">
-
-                    <h2 className="
-                        text-xl
-                        font-bold
-                        text-gray-800
-                        mb-6
-                    ">
+                    <h2
+                        className="
+                            text-xl
+                            font-bold
+                            text-gray-800
+                            mb-6
+                        "
+                    >
                         ➕ Add New Dustbin
                     </h2>
 
@@ -502,12 +619,14 @@ function Dustbins() {
 
                         <div>
 
-                            <label className="
-                                block
-                                font-medium
-                                text-gray-700
-                                mb-2
-                            ">
+                            <label
+                                className="
+                                    block
+                                    font-medium
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
                                 Dustbin Name
                             </label>
 
@@ -537,12 +656,14 @@ function Dustbins() {
 
                         <div>
 
-                            <label className="
-                                block
-                                font-medium
-                                text-gray-700
-                                mb-2
-                            ">
+                            <label
+                                className="
+                                    block
+                                    font-medium
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
                                 Dustbin Type
                             </label>
 
@@ -597,12 +718,14 @@ function Dustbins() {
 
                         <div className="lg:col-span-2">
 
-                            <label className="
-                                block
-                                font-medium
-                                text-gray-700
-                                mb-2
-                            ">
+                            <label
+                                className="
+                                    block
+                                    font-medium
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
                                 Address
                             </label>
 
@@ -632,46 +755,52 @@ function Dustbins() {
 
                         <div className="lg:col-span-2">
 
-                            <label className="
-                                block
-                                font-medium
-                                text-gray-700
-                                mb-2
-                            ">
+                            <label
+                                className="
+                                    block
+                                    font-medium
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
                                 📍 Select Location on Map
                             </label>
 
-                            <p className="
-                                text-sm
-                                text-gray-500
-                                mb-3
-                            ">
-                                Click anywhere on the map to select
-                                the exact dustbin location.
+                            <p
+                                className="
+                                    text-sm
+                                    text-gray-500
+                                    mb-3
+                                "
+                            >
+                                Click anywhere on the map to
+                                select the exact dustbin location.
                             </p>
 
-                            <div className="
-                                rounded-2xl
-                                overflow-hidden
-                                border
-                                border-gray-300
-                                shadow
-                            ">
+                            <div
+                                className="
+                                    rounded-2xl
+                                    overflow-hidden
+                                    border
+                                    border-gray-300
+                                    shadow
+                                "
+                            >
 
                                 <MapContainer
                                     center={[
                                         22.8046,
-                                        86.2029
+                                        86.2029,
                                     ]}
                                     zoom={13}
                                     style={{
                                         height: "400px",
-                                        width: "100%"
+                                        width: "100%",
                                     }}
                                 >
 
                                     <TileLayer
-                                        attribution='&copy; OpenStreetMap contributors'
+                                        attribution="&copy; OpenStreetMap contributors"
                                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                     />
 
@@ -692,12 +821,14 @@ function Dustbins() {
 
                         <div>
 
-                            <label className="
-                                block
-                                font-medium
-                                text-gray-700
-                                mb-2
-                            ">
+                            <label
+                                className="
+                                    block
+                                    font-medium
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
                                 Latitude
                             </label>
 
@@ -726,12 +857,14 @@ function Dustbins() {
 
                         <div>
 
-                            <label className="
-                                block
-                                font-medium
-                                text-gray-700
-                                mb-2
-                            ">
+                            <label
+                                className="
+                                    block
+                                    font-medium
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
                                 Longitude
                             </label>
 
@@ -758,11 +891,13 @@ function Dustbins() {
 
                         {/* ACTIVE */}
 
-                        <div className="
-                            flex
-                            items-center
-                            gap-3
-                        ">
+                        <div
+                            className="
+                                flex
+                                items-center
+                                gap-3
+                            "
+                        >
 
                             <input
                                 type="checkbox"
@@ -777,10 +912,12 @@ function Dustbins() {
                                 "
                             />
 
-                            <label className="
-                                font-medium
-                                text-gray-700
-                            ">
+                            <label
+                                className="
+                                    font-medium
+                                    text-gray-700
+                                "
+                            >
                                 Active Dustbin
                             </label>
 
@@ -788,12 +925,14 @@ function Dustbins() {
 
                         {/* BUTTONS */}
 
-                        <div className="
-                            lg:col-span-2
-                            flex
-                            gap-4
-                            pt-2
-                        ">
+                        <div
+                            className="
+                                lg:col-span-2
+                                flex
+                                gap-4
+                                pt-2
+                            "
+                        >
 
                             <button
                                 type="submit"
@@ -812,8 +951,7 @@ function Dustbins() {
                             >
                                 {saving
                                     ? "Adding..."
-                                    : "💾 Add Dustbin"
-                                }
+                                    : "💾 Add Dustbin"}
                             </button>
 
                             <button
@@ -840,43 +978,50 @@ function Dustbins() {
                     </form>
 
                 </div>
-
             )}
 
-            {/* ==========================================
+            {/* ==================================================
                 DUSTBIN LIST
-            ========================================== */}
+            ================================================== */}
 
-            <div className="
-                bg-white
-                rounded-2xl
-                shadow-xl
-                overflow-hidden
-            ">
+            <div
+                className="
+                    bg-white
+                    rounded-2xl
+                    shadow-xl
+                    overflow-hidden
+                "
+            >
 
-                <div className="
-                    px-6
-                    py-5
-                    border-b
-                    flex
-                    items-center
-                    justify-between
-                ">
+                <div
+                    className="
+                        px-6
+                        py-5
+                        border-b
+                        flex
+                        items-center
+                        justify-between
+                    "
+                >
 
                     <div>
 
-                        <h2 className="
-                            text-xl
-                            font-bold
-                            text-gray-800
-                        ">
+                        <h2
+                            className="
+                                text-xl
+                                font-bold
+                                text-gray-800
+                            "
+                        >
                             All Dustbins
                         </h2>
 
-                        <p className="
-                            text-gray-500
-                            text-sm
-                        ">
+                        <p
+                            className="
+                                text-gray-500
+                                text-sm
+                            "
+                        >
                             {dustbins.length} dustbins added
                         </p>
 
@@ -885,28 +1030,28 @@ function Dustbins() {
                 </div>
 
                 {dustbins.length === 0 ? (
-
-                    <div className="
-                        p-10
-                        text-center
-                        text-gray-500
-                    ">
+                    <div
+                        className="
+                            p-10
+                            text-center
+                            text-gray-500
+                        "
+                    >
                         No dustbins found.
                     </div>
-
                 ) : (
-
-                    <div className="
-                        grid
-                        grid-cols-1
-                        md:grid-cols-2
-                        xl:grid-cols-3
-                        gap-5
-                        p-6
-                    ">
+                    <div
+                        className="
+                            grid
+                            grid-cols-1
+                            md:grid-cols-2
+                            xl:grid-cols-3
+                            gap-5
+                            p-6
+                        "
+                    >
 
                         {dustbins.map((dustbin) => (
-
                             <div
                                 key={dustbin.id}
                                 className="
@@ -921,34 +1066,40 @@ function Dustbins() {
 
                                 {/* DUSTBIN HEADER */}
 
-                                <div className="
-                                    flex
-                                    items-start
-                                    justify-between
-                                    gap-3
-                                ">
+                                <div
+                                    className="
+                                        flex
+                                        items-start
+                                        justify-between
+                                        gap-3
+                                    "
+                                >
 
                                     <div>
 
-                                        <h3 className="
-                                            text-lg
-                                            font-bold
-                                            text-gray-800
-                                        ">
+                                        <h3
+                                            className="
+                                                text-lg
+                                                font-bold
+                                                text-gray-800
+                                            "
+                                        >
                                             🗑️ {dustbin.name}
                                         </h3>
 
-                                        <span className="
-                                            inline-block
-                                            mt-2
-                                            bg-green-100
-                                            text-green-700
-                                            px-3
-                                            py-1
-                                            rounded-full
-                                            text-xs
-                                            font-semibold
-                                        ">
+                                        <span
+                                            className="
+                                                inline-block
+                                                mt-2
+                                                bg-green-100
+                                                text-green-700
+                                                px-3
+                                                py-1
+                                                rounded-full
+                                                text-xs
+                                                font-semibold
+                                            "
+                                        >
                                             {dustbin.dustbin_type}
                                         </span>
 
@@ -970,31 +1121,34 @@ function Dustbins() {
                                     >
                                         {dustbin.is_full
                                             ? "FULL"
-                                            : "AVAILABLE"
-                                        }
+                                            : "AVAILABLE"}
                                     </span>
 
                                 </div>
 
                                 {/* ADDRESS */}
 
-                                <p className="
-                                    text-gray-600
-                                    text-sm
-                                    mt-4
-                                ">
+                                <p
+                                    className="
+                                        text-gray-600
+                                        text-sm
+                                        mt-4
+                                    "
+                                >
                                     📍 {dustbin.address}
                                 </p>
 
                                 {/* LOCATION */}
 
-                                <div className="
-                                    mt-4
-                                    bg-gray-50
-                                    rounded-xl
-                                    p-3
-                                    text-sm
-                                ">
+                                <div
+                                    className="
+                                        mt-4
+                                        bg-gray-50
+                                        rounded-xl
+                                        p-3
+                                        text-sm
+                                    "
+                                >
 
                                     <p>
                                         <b>Latitude:</b>{" "}
@@ -1010,28 +1164,34 @@ function Dustbins() {
 
                                 {/* BIN ID */}
 
-                                <div className="
-                                    mt-4
-                                    bg-green-50
-                                    rounded-xl
-                                    p-3
-                                    text-sm
-                                    border
-                                    border-green-100
-                                ">
+                                <div
+                                    className="
+                                        mt-4
+                                        bg-green-50
+                                        rounded-xl
+                                        p-3
+                                        text-sm
+                                        border
+                                        border-green-100
+                                    "
+                                >
 
-                                    <p className="
-                                        text-gray-500
-                                        text-xs
-                                        mb-1
-                                    ">
+                                    <p
+                                        className="
+                                            text-gray-500
+                                            text-xs
+                                            mb-1
+                                        "
+                                    >
                                         BIN ID
                                     </p>
 
-                                    <p className="
-                                        font-bold
-                                        text-green-700
-                                    ">
+                                    <p
+                                        className="
+                                            font-bold
+                                            text-green-700
+                                        "
+                                    >
                                         {dustbin.bin_id}
                                     </p>
 
@@ -1039,20 +1199,24 @@ function Dustbins() {
 
                                 {/* QR CODE */}
 
-                                <div className="
-                                    mt-5
-                                    border-t
-                                    pt-5
-                                    text-center
-                                ">
+                                <div
+                                    className="
+                                        mt-5
+                                        border-t
+                                        pt-5
+                                        text-center
+                                    "
+                                >
 
-                                    <div className="
-                                        flex
-                                        items-center
-                                        justify-center
-                                        gap-2
-                                        mb-4
-                                    ">
+                                    <div
+                                        className="
+                                            flex
+                                            items-center
+                                            justify-center
+                                            gap-2
+                                            mb-4
+                                        "
+                                    >
 
                                         <QrCode
                                             size={20}
@@ -1061,17 +1225,18 @@ function Dustbins() {
                                             "
                                         />
 
-                                        <h4 className="
-                                            font-bold
-                                            text-gray-700
-                                        ">
+                                        <h4
+                                            className="
+                                                font-bold
+                                                text-gray-700
+                                            "
+                                        >
                                             Dustbin QR Code
                                         </h4>
 
                                     </div>
 
                                     {dustbin.qr_code_url ? (
-
                                         <img
                                             src={
                                                 dustbin.qr_code_url
@@ -1089,43 +1254,45 @@ function Dustbins() {
                                                 bg-white
                                             "
                                         />
-
                                     ) : (
-
-                                        <div className="
-                                            bg-gray-100
-                                            rounded-xl
-                                            p-8
-                                            text-gray-500
-                                            text-sm
-                                        ">
+                                        <div
+                                            className="
+                                                bg-gray-100
+                                                rounded-xl
+                                                p-8
+                                                text-gray-500
+                                                text-sm
+                                            "
+                                        >
                                             QR code not available
                                         </div>
-
                                     )}
 
-                                    <p className="
-                                        text-xs
-                                        text-green-700
-                                        font-semibold
-                                        mt-3
-                                    ">
+                                    <p
+                                        className="
+                                            text-xs
+                                            text-green-700
+                                            font-semibold
+                                            mt-3
+                                        "
+                                    >
                                         Scan to view dustbin details
                                     </p>
 
                                     {/* QR BUTTONS */}
 
-                                    <div className="
-                                        flex
-                                        flex-col
-                                        sm:flex-row
-                                        gap-2
-                                        mt-4
-                                        justify-center
-                                    ">
+                                    <div
+                                        className="
+                                            flex
+                                            flex-col
+                                            sm:flex-row
+                                            gap-2
+                                            mt-4
+                                            justify-center
+                                        "
+                                    >
 
                                         {dustbin.qr_code_url && (
-
                                             <button
                                                 onClick={() =>
                                                     handleDownloadQR(
@@ -1156,7 +1323,6 @@ function Dustbins() {
                                                 Download
 
                                             </button>
-
                                         )}
 
                                         <button
@@ -1195,11 +1361,9 @@ function Dustbins() {
                                 </div>
 
                             </div>
-
                         ))}
 
                     </div>
-
                 )}
 
             </div>
