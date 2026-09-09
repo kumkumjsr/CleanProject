@@ -6,7 +6,6 @@ function Register() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -21,35 +20,74 @@ function Register() {
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
 
     if (formData.password !== formData.confirm_password) {
       alert("Passwords do not match.");
       return;
     }
 
+    if (formData.password.length < 6) {
+      alert("Password must be at least 6 characters.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
+      // Don't send confirm_password to backend
+      const dataToSend = {
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        password: formData.password,
+      };
 
-      await registerUser(formData);
+      await registerUser(dataToSend);
 
-      alert("Registration Successful!");
+      // Account successfully created
+      alert("Registration Successful! 🎉");
 
-      navigate("/login");
+      // Go to login immediately
+      navigate("/login", { replace: true });
 
     } catch (error) {
+      console.error("Registration Error:", error);
 
       if (error.response) {
-        alert(JSON.stringify(error.response.data));
+        console.error("Backend Response:", error.response.data);
+
+        const backendError = error.response.data;
+
+        if (typeof backendError === "object") {
+          alert(
+            Object.entries(backendError)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join("\n")
+          );
+        } else {
+          alert(String(backendError));
+        }
+      } else if (error.code === "ECONNABORTED") {
+        alert(
+          "Server response is taking too long. Please try Login once."
+        );
       } else {
-        alert("Registration Failed");
+        alert(
+          "Registration request failed. Please check your internet connection and try again."
+        );
       }
 
     } finally {
@@ -79,6 +117,7 @@ function Register() {
           className="grid grid-cols-1 md:grid-cols-2 gap-5"
         >
 
+          {/* First Name */}
           <div>
             <label className="block mb-2 font-semibold">
               First Name
@@ -95,6 +134,7 @@ function Register() {
             />
           </div>
 
+          {/* Last Name */}
           <div>
             <label className="block mb-2 font-semibold">
               Last Name
@@ -110,6 +150,7 @@ function Register() {
             />
           </div>
 
+          {/* Username */}
           <div>
             <label className="block mb-2 font-semibold">
               Username
@@ -126,6 +167,7 @@ function Register() {
             />
           </div>
 
+          {/* Email */}
           <div>
             <label className="block mb-2 font-semibold">
               Email
@@ -142,6 +184,7 @@ function Register() {
             />
           </div>
 
+          {/* Phone */}
           <div>
             <label className="block mb-2 font-semibold">
               Phone
@@ -157,6 +200,7 @@ function Register() {
             />
           </div>
 
+          {/* Address */}
           <div>
             <label className="block mb-2 font-semibold">
               Address
@@ -172,6 +216,7 @@ function Register() {
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block mb-2 font-semibold">
               Password
@@ -188,6 +233,7 @@ function Register() {
             />
           </div>
 
+          {/* Confirm Password */}
           <div>
             <label className="block mb-2 font-semibold">
               Confirm Password
@@ -204,13 +250,17 @@ function Register() {
             />
           </div>
 
+          {/* Show Password */}
           <div className="md:col-span-2">
 
             <label className="flex items-center gap-2 cursor-pointer">
 
               <input
                 type="checkbox"
-                onChange={() => setShowPassword(!showPassword)}
+                checked={showPassword}
+                onChange={() =>
+                  setShowPassword((prev) => !prev)
+                }
               />
 
               Show Password
@@ -219,26 +269,37 @@ function Register() {
 
           </div>
 
+          {/* Register Button */}
           <div className="md:col-span-2">
+
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 rounded-lg font-semibold transition duration-300"
             >
-              {loading ? "Creating Account..." : "Register"}
+              {loading
+                ? "Creating Account... Please wait"
+                : "Register"}
             </button>
+
           </div>
 
+          {/* Login */}
           <div className="md:col-span-2 text-center mt-2">
+
             <p className="text-gray-600">
+
               Already have an account?{" "}
+
               <Link
                 to="/login"
                 className="text-green-700 font-semibold hover:underline"
               >
                 Login
               </Link>
+
             </p>
+
           </div>
 
         </form>
@@ -250,4 +311,6 @@ function Register() {
 }
 
 export default Register;
+
+
 
