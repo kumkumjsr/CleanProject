@@ -19,7 +19,10 @@ load_dotenv(BASE_DIR / ".env")
 # SECURITY
 # ============================================================
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-development-key"
+)
 
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
@@ -36,6 +39,7 @@ ALLOWED_HOSTS = [
 # ============================================================
 
 INSTALLED_APPS = [
+
     # Django
     "django.contrib.admin",
     "django.contrib.auth",
@@ -67,6 +71,7 @@ INSTALLED_APPS = [
 # ============================================================
 
 MIDDLEWARE = [
+
     "corsheaders.middleware.CorsMiddleware",
 
     "django.middleware.security.SecurityMiddleware",
@@ -106,6 +111,7 @@ TEMPLATES = [
 
         "OPTIONS": {
             "context_processors": [
+
                 "django.template.context_processors.request",
 
                 "django.contrib.auth.context_processors.auth",
@@ -125,25 +131,22 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 # ============================================================
-# DATABASE - POSTGRESQL
+# DATABASE - NEON POSTGRESQL
 # ============================================================
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-
-        "NAME": os.getenv("DB_NAME"),
-
-        "USER": os.getenv("DB_USER"),
-
+        "NAME": os.getenv("DB_NAME", "neondb"),
+        "USER": os.getenv("DB_USER", "neondb_owner"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
-
         "HOST": os.getenv("DB_HOST"),
-
         "PORT": os.getenv("DB_PORT", "5432"),
+        "OPTIONS": {
+            "sslmode": "require",
+        },
     }
 }
-
 
 # ============================================================
 # PASSWORD VALIDATION
@@ -199,6 +202,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # ============================================================
 # MEDIA FILES
@@ -232,8 +237,11 @@ REST_FRAMEWORK = {
 # ============================================================
 
 CORS_ALLOWED_ORIGINS = [
+
     "http://localhost:5173",
+
     "http://127.0.0.1:5173",
+
     "http://192.168.31.116:5173",
 ]
 
@@ -260,6 +268,7 @@ AUTH_USER_MODEL = "accounts.User"
 # ============================================================
 
 SIMPLE_JWT = {
+
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
 
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
@@ -274,7 +283,9 @@ SIMPLE_JWT = {
 # EMAIL CONFIGURATION - GMAIL SMTP
 # ============================================================
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend"
+)
 
 EMAIL_HOST = "smtp.gmail.com"
 
