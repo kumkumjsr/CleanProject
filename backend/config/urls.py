@@ -20,7 +20,6 @@ urlpatterns = [
         include("dashboard.urls")
     ),
 
-
     path(
         "api/token/",
         LoginView.as_view(),
@@ -34,44 +33,39 @@ urlpatterns = [
     ),
 
     path(
-    "api/dustbins/",
-    include("dustbins.urls")
-),
+        "api/dustbins/",
+        include("dustbins.urls")
+    ),
 
-path(
+    path(
+        "api/dustbin-report/",
+        include("dustbin_reports.urls")
+    ),
 
-"api/dustbin-report/",
+    path(
+        "api/tasks/",
+        include("tasks.urls")
+    ),
 
-include(
+    path(
+        "api/notifications/",
+        include("notifications.urls")
+    ),
 
-"dustbin_reports.urls"
+    path(
+        "api/employees/",
+        include("employees.urls")
+    ),
 
-)
-
-),
-
-path(
-    "api/tasks/",
-    include("tasks.urls")
-),
-
-path(
-    "api/notifications/",
-    include("notifications.urls")
-),
-path(
-    "api/employees/",
-    include("employees.urls")
-),
-path(
-    "api/complaints/",
-    include("complaints.urls")
-),
+    path(
+        "api/complaints/",
+        include("complaints.urls")
+    ),
 ]
 
 
-if settings.DEBUG:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
-    )
+# Serve media files
+urlpatterns += static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT
+)
