@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function ReportedDustbins() {
-    const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
+    // Production Django Backend
+    const BASEURL = "https://cleanproject-b0mh.onrender.com";
 
     const [dustbins, setDustbins] = useState([]);
     const [workers, setWorkers] = useState([]);
@@ -163,7 +164,6 @@ function ReportedDustbins() {
             setSelectedDustbin(null);
             setSelectedWorker("");
 
-            // Refresh reported dustbins
             await fetchReports();
         } catch (error) {
             console.log(
@@ -189,7 +189,9 @@ function ReportedDustbins() {
         return (
             <div className="p-6">
                 <div className="bg-white shadow rounded-2xl p-10 text-center">
-                    <div className="text-4xl mb-3">🚨</div>
+                    <div className="text-4xl mb-3">
+                        🚨
+                    </div>
 
                     <p className="text-gray-500 text-lg">
                         Loading reported dustbins...
@@ -205,11 +207,11 @@ function ReportedDustbins() {
 
     return (
         <div className="p-6 md:p-8 bg-gray-50 min-h-screen">
-            {/* ==================================================
-                HEADER
-            ================================================== */}
+
+            {/* HEADER */}
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">
                         🚨 Reported Full Dustbins
@@ -225,14 +227,15 @@ function ReportedDustbins() {
                     {dustbins.length} Full Dustbin
                     {dustbins.length !== 1 ? "s" : ""}
                 </div>
+
             </div>
 
-            {/* ==================================================
-                NO REPORTS
-            ================================================== */}
+            {/* NO REPORTS */}
 
             {dustbins.length === 0 ? (
+
                 <div className="bg-white shadow-xl rounded-2xl p-10 text-center">
+
                     <div className="text-6xl mb-4">
                         ✅
                     </div>
@@ -244,14 +247,15 @@ function ReportedDustbins() {
                     <p className="text-gray-500 mt-2">
                         All dustbins are currently available.
                     </p>
+
                 </div>
+
             ) : (
-                /* ==================================================
-                   DUSTBIN CARDS
-                ================================================== */
 
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
                     {dustbins.map((item) => (
+
                         <div
                             key={item.id}
                             className="
@@ -265,9 +269,11 @@ function ReportedDustbins() {
                                 transition
                             "
                         >
+
                             {/* STATUS */}
 
                             <div className="flex items-center justify-between">
+
                                 <span
                                     className="
                                         bg-red-100
@@ -287,6 +293,7 @@ function ReportedDustbins() {
                                         {item.bin_id}
                                     </span>
                                 )}
+
                             </div>
 
                             {/* NAME */}
@@ -298,23 +305,28 @@ function ReportedDustbins() {
                             {/* TYPE */}
 
                             <div className="mt-3">
-                                <span className="
-                                    inline-block
-                                    bg-green-100
-                                    text-green-700
-                                    px-3
-                                    py-1
-                                    rounded-full
-                                    text-xs
-                                    font-semibold
-                                ">
+
+                                <span
+                                    className="
+                                        inline-block
+                                        bg-green-100
+                                        text-green-700
+                                        px-3
+                                        py-1
+                                        rounded-full
+                                        text-xs
+                                        font-semibold
+                                    "
+                                >
                                     {item.type}
                                 </span>
+
                             </div>
 
                             {/* ADDRESS */}
 
                             <div className="mt-4 bg-gray-50 rounded-xl p-4">
+
                                 <p className="text-xs text-gray-500 mb-1">
                                     LOCATION
                                 </p>
@@ -322,11 +334,13 @@ function ReportedDustbins() {
                                 <p className="text-gray-700 font-medium">
                                     📍 {item.address}
                                 </p>
+
                             </div>
 
                             {/* COORDINATES */}
 
                             <div className="mt-3 bg-gray-50 rounded-xl p-4 text-sm">
+
                                 <p>
                                     <b>Latitude:</b>{" "}
                                     {item.latitude}
@@ -336,35 +350,44 @@ function ReportedDustbins() {
                                     <b>Longitude:</b>{" "}
                                     {item.longitude}
                                 </p>
+
                             </div>
 
                             {/* PRIORITY */}
 
-                            <div className="
-                                mt-4
-                                bg-red-50
-                                border
-                                border-red-100
-                                rounded-xl
-                                p-4
-                            ">
+                            <div
+                                className="
+                                    mt-4
+                                    bg-red-50
+                                    border
+                                    border-red-100
+                                    rounded-xl
+                                    p-4
+                                "
+                            >
+
                                 <div className="flex justify-between items-center">
+
                                     <span className="text-sm text-gray-600">
                                         Collection Priority
                                     </span>
 
-                                    <span className="
-                                        bg-red-600
-                                        text-white
-                                        px-3
-                                        py-1
-                                        rounded-full
-                                        text-xs
-                                        font-bold
-                                    ">
+                                    <span
+                                        className="
+                                            bg-red-600
+                                            text-white
+                                            px-3
+                                            py-1
+                                            rounded-full
+                                            text-xs
+                                            font-bold
+                                        "
+                                    >
                                         HIGH
                                     </span>
+
                                 </div>
+
                             </div>
 
                             {/* VIEW LOCATION */}
@@ -409,16 +432,19 @@ function ReportedDustbins() {
                             >
                                 👷 Assign Worker
                             </button>
+
                         </div>
+
                     ))}
+
                 </div>
+
             )}
 
-            {/* ==================================================
-                ASSIGN WORKER MODAL
-            ================================================== */}
+            {/* ASSIGN WORKER MODAL */}
 
             {showModal && (
+
                 <div
                     className="
                         fixed
@@ -431,18 +457,23 @@ function ReportedDustbins() {
                         p-4
                     "
                 >
-                    <div className="
-                        bg-white
-                        rounded-2xl
-                        p-6
-                        md:p-8
-                        w-full
-                        max-w-md
-                        shadow-2xl
-                    ">
+
+                    <div
+                        className="
+                            bg-white
+                            rounded-2xl
+                            p-6
+                            md:p-8
+                            w-full
+                            max-w-md
+                            shadow-2xl
+                        "
+                    >
+
                         {/* MODAL HEADER */}
 
                         <div className="flex items-center justify-between mb-5">
+
                             <h2 className="text-xl font-bold text-gray-800">
                                 👷 Assign Worker
                             </h2>
@@ -459,18 +490,22 @@ function ReportedDustbins() {
                             >
                                 ✕
                             </button>
+
                         </div>
 
                         {/* DUSTBIN */}
 
-                        <div className="
-                            bg-red-50
-                            border
-                            border-red-100
-                            rounded-xl
-                            p-4
-                            mb-5
-                        ">
+                        <div
+                            className="
+                                bg-red-50
+                                border
+                                border-red-100
+                                rounded-xl
+                                p-4
+                                mb-5
+                            "
+                        >
+
                             <p className="text-xs text-gray-500">
                                 FULL DUSTBIN
                             </p>
@@ -488,44 +523,56 @@ function ReportedDustbins() {
                                     {selectedDustbin.bin_id}
                                 </p>
                             )}
+
                         </div>
 
                         {/* WORKER SELECT */}
 
-                        <label className="
-                            block
-                            font-medium
-                            text-gray-700
-                            mb-2
-                        ">
+                        <label
+                            className="
+                                block
+                                font-medium
+                                text-gray-700
+                                mb-2
+                            "
+                        >
                             Select Available Worker
                         </label>
 
                         {workersLoading ? (
-                            <div className="
-                                w-full
-                                border
-                                rounded-xl
-                                p-3
-                                text-gray-500
-                                text-center
-                            ">
+
+                            <div
+                                className="
+                                    w-full
+                                    border
+                                    rounded-xl
+                                    p-3
+                                    text-gray-500
+                                    text-center
+                                "
+                            >
                                 Loading workers...
                             </div>
+
                         ) : workers.length === 0 ? (
-                            <div className="
-                                w-full
-                                bg-yellow-50
-                                border
-                                border-yellow-200
-                                rounded-xl
-                                p-4
-                                text-yellow-700
-                                text-sm
-                            ">
+
+                            <div
+                                className="
+                                    w-full
+                                    bg-yellow-50
+                                    border
+                                    border-yellow-200
+                                    rounded-xl
+                                    p-4
+                                    text-yellow-700
+                                    text-sm
+                                "
+                            >
                                 ⚠️ No available workers found.
                             </div>
+
                         ) : (
+
                             <select
                                 value={selectedWorker}
                                 onChange={(e) =>
@@ -544,11 +591,13 @@ function ReportedDustbins() {
                                     focus:ring-green-500
                                 "
                             >
+
                                 <option value="">
                                     Select Worker
                                 </option>
 
                                 {workers.map((worker) => (
+
                                     <option
                                         key={worker.id}
                                         value={worker.id}
@@ -558,8 +607,11 @@ function ReportedDustbins() {
                                             ? ` - ${worker.department}`
                                             : ""}
                                     </option>
+
                                 ))}
+
                             </select>
+
                         )}
 
                         {/* ASSIGN */}
@@ -609,9 +661,13 @@ function ReportedDustbins() {
                         >
                             Cancel
                         </button>
+
                     </div>
+
                 </div>
+
             )}
+
         </div>
     );
 }

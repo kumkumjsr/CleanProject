@@ -470,8 +470,6 @@
 
 
 
-
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -479,7 +477,10 @@ import axios from "axios";
 function DustbinDetails() {
     const { binId } = useParams();
 
-    const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
+    // ================================
+    // RENDER BACKEND URL
+    // ================================
+    const BASEURL = "https://cleanproject-b0mh.onrender.com";
 
     const [dustbin, setDustbin] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -496,17 +497,13 @@ function DustbinDetails() {
     const [complaintDescription, setComplaintDescription] = useState("");
     const [complaintImage, setComplaintImage] = useState(null);
 
-
     // ==========================================
     // FETCH DUSTBIN
     // ==========================================
 
     useEffect(() => {
-
         const fetchDustbin = async () => {
-
             try {
-
                 setLoading(true);
                 setError("");
 
@@ -517,29 +514,19 @@ function DustbinDetails() {
                 setDustbin(response.data);
 
             } catch (err) {
-
                 console.error(
                     "Dustbin fetch error:",
-                    err
+                    err.response?.data || err
                 );
 
                 if (err.response?.status === 404) {
-
-                    setError(
-                        "Dustbin not found."
-                    );
-
+                    setError("Dustbin not found.");
                 } else {
-
-                    setError(
-                        "Unable to load dustbin details."
-                    );
+                    setError("Unable to load dustbin details.");
                 }
 
             } finally {
-
                 setLoading(false);
-
             }
         };
 
@@ -547,21 +534,18 @@ function DustbinDetails() {
             fetchDustbin();
         }
 
-    }, [binId, BASEURL]);
-
+    }, [binId]);
 
     // ==========================================
     // REPORT DUSTBIN AS FULL
     // ==========================================
 
     const handleReportFull = async () => {
-
         if (!dustbin) {
             return;
         }
 
         try {
-
             setReporting(true);
 
             const response = await axios.post(
@@ -573,7 +557,6 @@ function DustbinDetails() {
                 "Dustbin reported as full successfully."
             );
 
-            // Update UI immediately
             setDustbin((prev) => ({
                 ...prev,
                 is_full: true,
@@ -583,7 +566,6 @@ function DustbinDetails() {
             }));
 
         } catch (err) {
-
             console.error(
                 "Report dustbin error:",
                 err.response?.data || err
@@ -596,19 +578,15 @@ function DustbinDetails() {
             );
 
         } finally {
-
             setReporting(false);
-
         }
     };
-
 
     // ==========================================
     // OPEN COMPLAINT FORM
     // ==========================================
 
     const openComplaintForm = () => {
-
         setComplaintTitle("");
         setComplaintDescription("");
         setComplaintImage(null);
@@ -616,13 +594,11 @@ function DustbinDetails() {
         setShowComplaint(true);
     };
 
-
     // ==========================================
     // CLOSE COMPLAINT FORM
     // ==========================================
 
     const closeComplaintForm = () => {
-
         if (submittingComplaint) {
             return;
         }
@@ -634,13 +610,11 @@ function DustbinDetails() {
         setComplaintImage(null);
     };
 
-
     // ==========================================
     // SUBMIT COMPLAINT
     // ==========================================
 
     const handleComplaintSubmit = async (e) => {
-
         e.preventDefault();
 
         if (!dustbin) {
@@ -648,25 +622,16 @@ function DustbinDetails() {
         }
 
         if (!complaintTitle.trim()) {
-
-            alert(
-                "Please enter complaint title."
-            );
-
+            alert("Please select complaint type.");
             return;
         }
 
         if (!complaintDescription.trim()) {
-
-            alert(
-                "Please describe the problem."
-            );
-
+            alert("Please describe the problem.");
             return;
         }
 
         try {
-
             setSubmittingComplaint(true);
 
             const formData = new FormData();
@@ -687,7 +652,6 @@ function DustbinDetails() {
             );
 
             if (complaintImage) {
-
                 formData.append(
                     "image",
                     complaintImage
@@ -704,7 +668,6 @@ function DustbinDetails() {
                 "Complaint submitted successfully."
             );
 
-            // Close form
             setShowComplaint(false);
 
             setComplaintTitle("");
@@ -712,20 +675,17 @@ function DustbinDetails() {
             setComplaintImage(null);
 
         } catch (err) {
-
             console.error(
                 "Complaint submit error:",
                 err.response?.data || err
             );
 
-            const errorData =
-                err.response?.data;
+            const errorData = err.response?.data;
 
             if (
                 errorData &&
                 typeof errorData === "object"
             ) {
-
                 const messages = Object.values(
                     errorData
                 ).flat();
@@ -737,31 +697,22 @@ function DustbinDetails() {
                 );
 
             } else {
-
-                alert(
-                    "Unable to submit complaint."
-                );
+                alert("Unable to submit complaint.");
             }
 
         } finally {
-
             setSubmittingComplaint(false);
-
         }
     };
-
 
     // ==========================================
     // LOADING
     // ==========================================
 
     if (loading) {
-
         return (
             <div className="min-h-screen flex items-center justify-center bg-green-50">
-
                 <div className="text-center">
-
                     <div className="text-4xl mb-3">
                         ♻️
                     </div>
@@ -769,23 +720,18 @@ function DustbinDetails() {
                     <p className="text-gray-600">
                         Loading dustbin details...
                     </p>
-
                 </div>
-
             </div>
         );
     }
-
 
     // ==========================================
     // ERROR
     // ==========================================
 
     if (error) {
-
         return (
             <div className="min-h-screen flex items-center justify-center bg-red-50 px-4">
-
                 <div className="bg-white shadow-lg rounded-2xl p-8 text-center max-w-md w-full">
 
                     <div className="text-5xl mb-4">
@@ -805,11 +751,9 @@ function DustbinDetails() {
                     </p>
 
                 </div>
-
             </div>
         );
     }
-
 
     // ==========================================
     // MAIN PAGE
@@ -838,15 +782,11 @@ function DustbinDetails() {
 
                 </div>
 
-
                 {/* MAIN CARD */}
 
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
 
-
-                    {/* ==================================
-                        STATUS
-                    ================================== */}
+                    {/* STATUS */}
 
                     <div
                         className={`p-6 text-center ${
@@ -857,11 +797,9 @@ function DustbinDetails() {
                     >
 
                         <div className="text-4xl mb-2">
-
                             {dustbin.status === "FULL"
                                 ? "🔴"
                                 : "🟢"}
-
                         </div>
 
                         <h2
@@ -871,29 +809,22 @@ function DustbinDetails() {
                                     : "text-green-700"
                             }`}
                         >
-
                             {dustbin.status === "FULL"
                                 ? "Dustbin is FULL"
                                 : "Dustbin is AVAILABLE"}
-
                         </h2>
 
                     </div>
-
 
                     {/* DETAILS */}
 
                     <div className="p-6 md:p-8">
 
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">
-
                             {dustbin.name}
-
                         </h2>
 
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
 
                             {/* BIN ID */}
 
@@ -909,7 +840,6 @@ function DustbinDetails() {
 
                             </div>
 
-
                             {/* TYPE */}
 
                             <div className="bg-gray-50 rounded-xl p-4">
@@ -923,7 +853,6 @@ function DustbinDetails() {
                                 </p>
 
                             </div>
-
 
                             {/* ADDRESS */}
 
@@ -939,7 +868,6 @@ function DustbinDetails() {
 
                             </div>
 
-
                             {/* LATITUDE */}
 
                             <div className="bg-gray-50 rounded-xl p-4">
@@ -954,7 +882,6 @@ function DustbinDetails() {
 
                             </div>
 
-
                             {/* LONGITUDE */}
 
                             <div className="bg-gray-50 rounded-xl p-4">
@@ -968,7 +895,6 @@ function DustbinDetails() {
                                 </p>
 
                             </div>
-
 
                             {/* PRIORITY */}
 
@@ -989,7 +915,6 @@ function DustbinDetails() {
                                 </p>
 
                             </div>
-
 
                             {/* PRIORITY SCORE */}
 
@@ -1013,10 +938,7 @@ function DustbinDetails() {
 
                         </div>
 
-
-                        {/* ==================================
-                            REPORT FULL
-                        ================================== */}
+                        {/* REPORT FULL */}
 
                         {dustbin.status !== "FULL" ? (
 
@@ -1062,11 +984,9 @@ function DustbinDetails() {
                                             transition
                                         "
                                     >
-
                                         {reporting
                                             ? "Reporting..."
                                             : "🚨 Report as FULL"}
-
                                     </button>
 
                                 </div>
@@ -1116,13 +1036,9 @@ function DustbinDetails() {
                                 </div>
 
                             </div>
-
                         )}
 
-
-                        {/* ==================================
-                            REPORT COMPLAINT
-                        ================================== */}
+                        {/* REPORT COMPLAINT */}
 
                         <div className="mt-6">
 
@@ -1170,10 +1086,7 @@ function DustbinDetails() {
 
                         </div>
 
-
-                        {/* ==================================
-                            QR IMAGE
-                        ================================== */}
+                        {/* QR IMAGE */}
 
                         {dustbin.qr_code && (
 
@@ -1198,7 +1111,6 @@ function DustbinDetails() {
                 </div>
 
             </div>
-
 
             {/* ==========================================
                 COMPLAINT MODAL
@@ -1265,7 +1177,6 @@ function DustbinDetails() {
                             </button>
 
                         </div>
-
 
                         {/* COMPLAINT FORM */}
 
@@ -1347,7 +1258,6 @@ function DustbinDetails() {
 
                             </div>
 
-
                             {/* DESCRIPTION */}
 
                             <div>
@@ -1386,7 +1296,6 @@ function DustbinDetails() {
 
                             </div>
 
-
                             {/* IMAGE */}
 
                             <div>
@@ -1424,7 +1333,6 @@ function DustbinDetails() {
                                 />
 
                                 {complaintImage && (
-
                                     <p className="
                                         text-xs
                                         text-green-600
@@ -1432,11 +1340,9 @@ function DustbinDetails() {
                                     ">
                                         ✅ {complaintImage.name}
                                     </p>
-
                                 )}
 
                             </div>
-
 
                             {/* DUSTBIN INFO */}
 
@@ -1463,7 +1369,6 @@ function DustbinDetails() {
                                 </p>
 
                             </div>
-
 
                             {/* BUTTONS */}
 
@@ -1507,11 +1412,9 @@ function DustbinDetails() {
                                         font-bold
                                     "
                                 >
-
                                     {submittingComplaint
                                         ? "Submitting..."
                                         : "📝 Submit Complaint"}
-
                                 </button>
 
                             </div>
@@ -1521,7 +1424,6 @@ function DustbinDetails() {
                     </div>
 
                 </div>
-
             )}
 
         </div>
