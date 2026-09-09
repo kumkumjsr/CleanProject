@@ -145,6 +145,7 @@
     
 
 
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -167,7 +168,8 @@ class CreateComplaintView(APIView):
 
     def post(self, request):
 
-        dustbin_id = request.data.get("dustbin")
+        # Frontend sends "dustbin_id"
+        dustbin_id = request.data.get("dustbin_id")
 
         # Dustbin ID required
         if not dustbin_id:
@@ -220,17 +222,13 @@ class CreateComplaintView(APIView):
 
             return Response(
                 {
-                    "message":
-                    "Complaint submitted successfully",
+                    "message": "Complaint submitted successfully",
 
-                    "complaint_id":
-                    complaint.id,
+                    "complaint_id": complaint.id,
 
-                    "dustbin":
-                    dustbin.bin_id,
+                    "dustbin": dustbin.bin_id,
 
-                    "dustbin_name":
-                    dustbin.name
+                    "dustbin_name": dustbin.name
                 },
                 status=201
             )
@@ -315,8 +313,7 @@ class UpdateComplaintStatusView(APIView):
 
             return Response(
                 {
-                    "error":
-                    "Complaint not found"
+                    "error": "Complaint not found"
                 },
                 status=404
             )
@@ -333,8 +330,7 @@ class UpdateComplaintStatusView(APIView):
 
             return Response(
                 {
-                    "error":
-                    "Invalid complaint status"
+                    "error": "Invalid complaint status"
                 },
                 status=400
             )
@@ -345,7 +341,6 @@ class UpdateComplaintStatusView(APIView):
 
         return Response(
             {
-                "message":
-                "Complaint status updated"
+                "message": "Complaint status updated"
             }
         )
