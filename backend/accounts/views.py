@@ -22,24 +22,22 @@ from .serializers import (
 # ==========================
 
 
-
 class RegisterView(generics.CreateAPIView):
 
     queryset = User.objects.all()
 
     serializer_class = RegisterSerializer
 
-
     def perform_create(self, serializer):
 
         user = serializer.save()
 
+        try:
 
-        send_mail(
+            send_mail(
+                subject="🎉 Welcome to EcoSmart",
 
-            subject="🎉 Welcome to EcoSmart",
-
-            message=f"""
+                message=f"""
 Hello {user.first_name or user.username},
 
 Welcome to EcoSmart 🌱
@@ -60,14 +58,22 @@ Regards,
 EcoSmart Team
 """,
 
-            from_email=settings.DEFAULT_FROM_EMAIL,
+                from_email=settings.DEFAULT_FROM_EMAIL,
 
-            recipient_list=[user.email],
+                recipient_list=[
+                    user.email
+                ],
 
-            fail_silently=False
+                # Email fail hone par registration block nahi hoga
+                fail_silently=True
+            )
 
-        )
+        except Exception as e:
 
+            print(
+                "Welcome Email Error:",
+                e
+            )
 
 # ==========================
 # Login API
