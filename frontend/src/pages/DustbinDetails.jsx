@@ -469,16 +469,13 @@
 
 
 
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
 function DustbinDetails() {
     const { binId } = useParams();
-
-    // ==========================================
-    // RENDER BACKEND URL
-    // ==========================================
 
     const BASEURL = "https://cleanproject-b0mh.onrender.com";
 
@@ -490,7 +487,6 @@ function DustbinDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Report Full
     const [reporting, setReporting] = useState(false);
 
     // Complaint
@@ -502,7 +498,7 @@ function DustbinDetails() {
     const [complaintImage, setComplaintImage] = useState(null);
 
     // ==========================================
-    // FETCH DUSTBIN DETAILS
+    // FETCH DUSTBIN
     // ==========================================
 
     useEffect(() => {
@@ -514,6 +510,8 @@ function DustbinDetails() {
                 const response = await axios.get(
                     `${BASEURL}/api/dustbins/qr/${binId}/`
                 );
+
+                console.log("Dustbin API response:", response.data);
 
                 setDustbin(response.data);
 
@@ -541,7 +539,7 @@ function DustbinDetails() {
     }, [binId]);
 
     // ==========================================
-    // REPORT DUSTBIN AS FULL
+    // REPORT FULL
     // ==========================================
 
     const handleReportFull = async () => {
@@ -599,19 +597,18 @@ function DustbinDetails() {
     };
 
     // ==========================================
-    // OPEN COMPLAINT FORM
+    // OPEN COMPLAINT
     // ==========================================
 
     const openComplaintForm = () => {
         setComplaintTitle("");
         setComplaintDescription("");
         setComplaintImage(null);
-
         setShowComplaint(true);
     };
 
     // ==========================================
-    // CLOSE COMPLAINT FORM
+    // CLOSE COMPLAINT
     // ==========================================
 
     const closeComplaintForm = () => {
@@ -620,7 +617,6 @@ function DustbinDetails() {
         }
 
         setShowComplaint(false);
-
         setComplaintTitle("");
         setComplaintDescription("");
         setComplaintImage(null);
@@ -633,54 +629,49 @@ function DustbinDetails() {
     const handleComplaintSubmit = async (e) => {
         e.preventDefault();
 
-        // ------------------------------------------
-        // CHECK DUSTBIN
-        // ------------------------------------------
-
+        // Dustbin check
         if (!dustbin) {
             alert("Dustbin information is not available.");
             return;
         }
 
-        // ------------------------------------------
-        // CHECK COMPLAINT TITLE
-        // ------------------------------------------
+        // Internal database ID check
+        if (!dustbin.id) {
+            console.error("Complete dustbin data:", dustbin);
+            alert("Dustbin database ID is missing.");
+            return;
+        }
 
+        // Title check
         if (!complaintTitle.trim()) {
             alert("Please select complaint type.");
             return;
         }
 
-        // ------------------------------------------
-        // CHECK DESCRIPTION
-        // ------------------------------------------
-
+        // Description check
         if (!complaintDescription.trim()) {
             alert("Please describe the problem.");
             return;
         }
 
-        // ------------------------------------------
-        // CHECK DUSTBIN ID
-        // ------------------------------------------
+        // Token check
+        const token = localStorage.getItem("access");
 
-        if (!dustbin.id) {
-            alert("Dustbin ID is missing.");
-            console.error("Dustbin data:", dustbin);
+        if (!token) {
+            alert("Please login first to submit a complaint.");
             return;
         }
 
         try {
             setSubmittingComplaint(true);
 
-            // ------------------------------------------
-            // CREATE FORM DATA
-            // ------------------------------------------
+            // ==========================================
+            // CREATE FORMDATA
+            // ==========================================
 
             const formData = new FormData();
 
-            // ✅ IMPORTANT
-            // Backend expects "dustbin_id"
+            // VERY IMPORTANT
             formData.append(
                 "dustbin_id",
                 String(dustbin.id)
@@ -688,13 +679,21 @@ function DustbinDetails() {
 
             formData.append(
                 "title",
-                complaintTitle
+                complaintTitle.trim()
             );
 
             formData.append(
                 "description",
-                complaintDescription
+                complaintDescription.trim()
             );
+
+            // Send location also if required by serializer/model
+            if (dustbin.address) {
+                formData.append(
+                    "location",
+                    dustbin.address
+                );
+            }
 
             // Optional image
             if (complaintImage) {
@@ -704,35 +703,36 @@ function DustbinDetails() {
                 );
             }
 
-            // ------------------------------------------
-            // JWT TOKEN
-            // ------------------------------------------
+            // ==========================================
+            // DEBUG FORMDATA
+            // ==========================================
 
-            const token = localStorage.getItem("access");
+            console.log("========== COMPLAINT DATA ==========");
 
-            if (!token) {
-                alert("Please login first to submit a complaint.");
-                setSubmittingComplaint(false);
-                return;
+            for (const [key, value] of formData.entries()) {
+                console.log(
+                    key,
+                    value instanceof File
+                        ? value.name
+                        : value
+                );
             }
 
-            // ------------------------------------------
-            // DEBUG
-            // ------------------------------------------
-
             console.log(
-                "Submitting complaint for Dustbin ID:",
+                "Dustbin database ID:",
                 dustbin.id
             );
 
             console.log(
-                "Dustbin ID sent as dustbin_id:",
-                dustbin.id
+                "Dustbin BIN ID:",
+                dustbin.bin_id
             );
 
-            // ------------------------------------------
+            console.log("====================================");
+
+            // ==========================================
             // SEND REQUEST
-            // ------------------------------------------
+            // ==========================================
 
             const response = await axios.post(
                 `${BASEURL}/api/complaints/create/`,
@@ -744,9 +744,14 @@ function DustbinDetails() {
                 }
             );
 
-            // ------------------------------------------
+            console.log(
+                "Complaint success:",
+                response.data
+            );
+
+            // ==========================================
             // SUCCESS
-            // ------------------------------------------
+            // ==========================================
 
             alert(
                 response.data?.message ||
@@ -857,9 +862,7 @@ function DustbinDetails() {
 
             <div className="max-w-3xl mx-auto">
 
-                {/* ==========================================
-                    HEADER
-                ========================================== */}
+                {/* HEADER */}
 
                 <div className="text-center mb-8">
 
@@ -877,15 +880,11 @@ function DustbinDetails() {
 
                 </div>
 
-                {/* ==========================================
-                    MAIN CARD
-                ========================================== */}
+                {/* MAIN CARD */}
 
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
 
-                    {/* ==========================================
-                        STATUS
-                    ========================================== */}
+                    {/* STATUS */}
 
                     <div
                         className={`p-6 text-center ${
@@ -915,9 +914,7 @@ function DustbinDetails() {
 
                     </div>
 
-                    {/* ==========================================
-                        DETAILS
-                    ========================================== */}
+                    {/* DETAILS */}
 
                     <div className="p-6 md:p-8">
 
@@ -927,10 +924,7 @@ function DustbinDetails() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                            {/* BIN ID */}
-
                             <div className="bg-gray-50 rounded-xl p-4">
-
                                 <p className="text-sm text-gray-500">
                                     BIN ID
                                 </p>
@@ -938,13 +932,9 @@ function DustbinDetails() {
                                 <p className="font-bold text-green-700 mt-1">
                                     {dustbin.bin_id}
                                 </p>
-
                             </div>
 
-                            {/* TYPE */}
-
                             <div className="bg-gray-50 rounded-xl p-4">
-
                                 <p className="text-sm text-gray-500">
                                     Waste Type
                                 </p>
@@ -952,13 +942,9 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     {dustbin.dustbin_type}
                                 </p>
-
                             </div>
 
-                            {/* ADDRESS */}
-
                             <div className="bg-gray-50 rounded-xl p-4 md:col-span-2">
-
                                 <p className="text-sm text-gray-500">
                                     Address
                                 </p>
@@ -966,13 +952,9 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     📍 {dustbin.address}
                                 </p>
-
                             </div>
 
-                            {/* LATITUDE */}
-
                             <div className="bg-gray-50 rounded-xl p-4">
-
                                 <p className="text-sm text-gray-500">
                                     Latitude
                                 </p>
@@ -980,13 +962,9 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     {dustbin.latitude}
                                 </p>
-
                             </div>
 
-                            {/* LONGITUDE */}
-
                             <div className="bg-gray-50 rounded-xl p-4">
-
                                 <p className="text-sm text-gray-500">
                                     Longitude
                                 </p>
@@ -994,13 +972,9 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     {dustbin.longitude}
                                 </p>
-
                             </div>
 
-                            {/* PRIORITY */}
-
                             <div className="bg-gray-50 rounded-xl p-4">
-
                                 <p className="text-sm text-gray-500">
                                     Priority Level
                                 </p>
@@ -1014,13 +988,9 @@ function DustbinDetails() {
                                 >
                                     {dustbin.priority_level}
                                 </p>
-
                             </div>
 
-                            {/* PRIORITY SCORE */}
-
                             <div className="bg-gray-50 rounded-xl p-4">
-
                                 <p className="text-sm text-gray-500">
                                     Priority Score
                                 </p>
@@ -1034,29 +1004,17 @@ function DustbinDetails() {
                                 >
                                     {dustbin.priority_score}
                                 </p>
-
                             </div>
 
                         </div>
 
-                        {/* ==========================================
-                            REPORT FULL
-                        ========================================== */}
+                        {/* REPORT FULL */}
 
                         {dustbin.status !== "FULL" ? (
 
                             <div className="mt-8 border-t pt-8">
 
-                                <div
-                                    className="
-                                        bg-yellow-50
-                                        border
-                                        border-yellow-200
-                                        rounded-2xl
-                                        p-5
-                                        text-center
-                                    "
-                                >
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 text-center">
 
                                     <div className="text-3xl mb-2">
                                         🚨
@@ -1074,20 +1032,7 @@ function DustbinDetails() {
                                     <button
                                         onClick={handleReportFull}
                                         disabled={reporting}
-                                        className="
-                                            w-full
-                                            md:w-auto
-                                            px-8
-                                            py-3
-                                            bg-red-600
-                                            hover:bg-red-700
-                                            disabled:bg-red-300
-                                            disabled:cursor-not-allowed
-                                            text-white
-                                            rounded-xl
-                                            font-bold
-                                            transition
-                                        "
+                                        className="w-full md:w-auto px-8 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed text-white rounded-xl font-bold transition"
                                     >
                                         {reporting
                                             ? "Reporting..."
@@ -1102,16 +1047,7 @@ function DustbinDetails() {
 
                             <div className="mt-8 border-t pt-8">
 
-                                <div
-                                    className="
-                                        bg-red-50
-                                        border
-                                        border-red-200
-                                        rounded-2xl
-                                        p-5
-                                        text-center
-                                    "
-                                >
+                                <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-center">
 
                                     <div className="text-3xl mb-2">
                                         ✅
@@ -1126,19 +1062,7 @@ function DustbinDetails() {
                                         Collection has been prioritized.
                                     </p>
 
-                                    <div
-                                        className="
-                                            mt-4
-                                            inline-block
-                                            bg-red-600
-                                            text-white
-                                            px-4
-                                            py-2
-                                            rounded-full
-                                            text-sm
-                                            font-bold
-                                        "
-                                    >
+                                    <div className="mt-4 inline-block bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold">
                                         HIGH PRIORITY
                                     </div>
 
@@ -1148,22 +1072,11 @@ function DustbinDetails() {
 
                         )}
 
-                        {/* ==========================================
-                            REPORT COMPLAINT
-                        ========================================== */}
+                        {/* COMPLAINT */}
 
                         <div className="mt-6">
 
-                            <div
-                                className="
-                                    bg-blue-50
-                                    border
-                                    border-blue-200
-                                    rounded-2xl
-                                    p-5
-                                    text-center
-                                "
-                            >
+                            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-center">
 
                                 <div className="text-3xl mb-2">
                                     📝
@@ -1180,18 +1093,7 @@ function DustbinDetails() {
 
                                 <button
                                     onClick={openComplaintForm}
-                                    className="
-                                        w-full
-                                        md:w-auto
-                                        px-8
-                                        py-3
-                                        bg-blue-600
-                                        hover:bg-blue-700
-                                        text-white
-                                        rounded-xl
-                                        font-bold
-                                        transition
-                                    "
+                                    className="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition"
                                 >
                                     📝 Report a Complaint
                                 </button>
@@ -1200,9 +1102,7 @@ function DustbinDetails() {
 
                         </div>
 
-                        {/* ==========================================
-                            QR IMAGE
-                        ========================================== */}
+                        {/* QR CODE */}
 
                         {dustbin.qr_code && (
 
@@ -1234,36 +1134,11 @@ function DustbinDetails() {
 
             {showComplaint && (
 
-                <div
-                    className="
-                        fixed
-                        inset-0
-                        z-50
-                        bg-black/50
-                        flex
-                        items-center
-                        justify-center
-                        p-4
-                    "
-                >
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
 
-                    <div
-                        className="
-                            bg-white
-                            rounded-2xl
-                            shadow-2xl
-                            w-full
-                            max-w-lg
-                            max-h-[90vh]
-                            overflow-y-auto
-                            p-6
-                            md:p-8
-                        "
-                    >
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 md:p-8">
 
-                        {/* ==========================================
-                            MODAL HEADER
-                        ========================================== */}
+                        {/* HEADER */}
 
                         <div className="flex items-center justify-between mb-6">
 
@@ -1286,60 +1161,34 @@ function DustbinDetails() {
                             <button
                                 onClick={closeComplaintForm}
                                 disabled={submittingComplaint}
-                                className="
-                                    text-gray-500
-                                    hover:text-gray-800
-                                    text-2xl
-                                    disabled:opacity-50
-                                "
+                                className="text-gray-500 hover:text-gray-800 text-2xl disabled:opacity-50"
                             >
                                 ✕
                             </button>
 
                         </div>
 
-                        {/* ==========================================
-                            COMPLAINT FORM
-                        ========================================== */}
+                        {/* FORM */}
 
                         <form
                             onSubmit={handleComplaintSubmit}
                             className="space-y-5"
                         >
 
-                            {/* COMPLAINT TYPE */}
+                            {/* TYPE */}
 
                             <div>
 
-                                <label
-                                    className="
-                                        block
-                                        text-sm
-                                        font-semibold
-                                        text-gray-700
-                                        mb-2
-                                    "
-                                >
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Complaint Type
                                 </label>
 
                                 <select
                                     value={complaintTitle}
                                     onChange={(e) =>
-                                        setComplaintTitle(
-                                            e.target.value
-                                        )
+                                        setComplaintTitle(e.target.value)
                                     }
-                                    className="
-                                        w-full
-                                        border
-                                        border-gray-300
-                                        rounded-xl
-                                        p-3
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-blue-500
-                                    "
+                                    className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
 
                                     <option value="">
@@ -1386,38 +1235,18 @@ function DustbinDetails() {
 
                             <div>
 
-                                <label
-                                    className="
-                                        block
-                                        text-sm
-                                        font-semibold
-                                        text-gray-700
-                                        mb-2
-                                    "
-                                >
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Description
                                 </label>
 
                                 <textarea
                                     value={complaintDescription}
                                     onChange={(e) =>
-                                        setComplaintDescription(
-                                            e.target.value
-                                        )
+                                        setComplaintDescription(e.target.value)
                                     }
                                     rows="5"
                                     placeholder="Describe the problem..."
-                                    className="
-                                        w-full
-                                        border
-                                        border-gray-300
-                                        rounded-xl
-                                        p-3
-                                        resize-none
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-blue-500
-                                    "
+                                    className="w-full border border-gray-300 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
 
                             </div>
@@ -1426,20 +1255,15 @@ function DustbinDetails() {
 
                             <div>
 
-                                <label
-                                    className="
-                                        block
-                                        text-sm
-                                        font-semibold
-                                        text-gray-700
-                                        mb-2
-                                    "
-                                >
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+
                                     Upload Photo
+
                                     <span className="text-gray-400 font-normal">
                                         {" "}
                                         (Optional)
                                     </span>
+
                                 </label>
 
                                 <input
@@ -1450,25 +1274,12 @@ function DustbinDetails() {
                                             e.target.files?.[0] || null
                                         )
                                     }
-                                    className="
-                                        w-full
-                                        border
-                                        border-gray-300
-                                        rounded-xl
-                                        p-3
-                                        text-sm
-                                    "
+                                    className="w-full border border-gray-300 rounded-xl p-3 text-sm"
                                 />
 
                                 {complaintImage && (
 
-                                    <p
-                                        className="
-                                            text-xs
-                                            text-green-600
-                                            mt-2
-                                        "
-                                    >
+                                    <p className="text-xs text-green-600 mt-2">
                                         ✅ {complaintImage.name}
                                     </p>
 
@@ -1478,13 +1289,7 @@ function DustbinDetails() {
 
                             {/* DUSTBIN INFO */}
 
-                            <div
-                                className="
-                                    bg-gray-50
-                                    rounded-xl
-                                    p-4
-                                "
-                            >
+                            <div className="bg-gray-50 rounded-xl p-4">
 
                                 <p className="text-xs text-gray-500">
                                     COMPLAINT FOR
@@ -1502,8 +1307,6 @@ function DustbinDetails() {
                                     📍 {dustbin.address}
                                 </p>
 
-                                {/* INTERNAL DATABASE ID */}
-
                                 <p className="text-xs text-gray-400 mt-2">
                                     Dustbin ID: {dustbin.id}
                                 </p>
@@ -1512,29 +1315,13 @@ function DustbinDetails() {
 
                             {/* BUTTONS */}
 
-                            <div
-                                className="
-                                    flex
-                                    flex-col
-                                    md:flex-row
-                                    gap-3
-                                "
-                            >
+                            <div className="flex flex-col md:flex-row gap-3">
 
                                 <button
                                     type="button"
                                     onClick={closeComplaintForm}
                                     disabled={submittingComplaint}
-                                    className="
-                                        flex-1
-                                        bg-gray-200
-                                        hover:bg-gray-300
-                                        disabled:opacity-50
-                                        text-gray-700
-                                        py-3
-                                        rounded-xl
-                                        font-semibold
-                                    "
+                                    className="flex-1 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 py-3 rounded-xl font-semibold"
                                 >
                                     Cancel
                                 </button>
@@ -1542,17 +1329,7 @@ function DustbinDetails() {
                                 <button
                                     type="submit"
                                     disabled={submittingComplaint}
-                                    className="
-                                        flex-1
-                                        bg-blue-600
-                                        hover:bg-blue-700
-                                        disabled:bg-blue-300
-                                        disabled:cursor-not-allowed
-                                        text-white
-                                        py-3
-                                        rounded-xl
-                                        font-bold
-                                    "
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold"
                                 >
                                     {submittingComplaint
                                         ? "Submitting..."
