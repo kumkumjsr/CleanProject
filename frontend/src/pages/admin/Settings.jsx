@@ -56,7 +56,7 @@ function Settings() {
         try {
 
             const response = await axios.get(
-                "http://127.0.0.1:8000/api/accounts/settings/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/settings/",
                 {
                     headers,
                 }
@@ -155,7 +155,7 @@ function Settings() {
         try {
 
             const response = await axios.put(
-                "http://127.0.0.1:8000/api/accounts/settings/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/settings/",
                 settings,
                 {
                     headers,

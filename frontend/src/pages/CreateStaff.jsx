@@ -31,7 +31,7 @@ function CreateStaff() {
       const token = localStorage.getItem("access");
 
       await axios.post(
-        "http://127.0.0.1:8000/api/accounts/create-staff/",
+        "https://cleanproject-b0mh.onrender.com/api/accounts/create-staff/",
         formData,
         {
           headers: {

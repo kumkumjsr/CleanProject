@@ -32,7 +32,7 @@ function EditTask(){
 
             const response = await axios.get(
 
-                `http://127.0.0.1:8000/api/tasks/admin/${id}/`,
+                `https://cleanproject-b0mh.onrender.com/api/tasks/admin/${id}/`,
 
                 {
 
@@ -118,7 +118,7 @@ function EditTask(){
 
     //         await axios.patch(
 
-    //             `http://127.0.0.1:8000/api/tasks/${id}/status/`,
+    //             `https://cleanproject-b0mh.onrender.com/api/tasks/${id}/status/`,
 
     //             {
 
@@ -175,7 +175,7 @@ function EditTask(){
 
         await axios.put(
 
-            `http://127.0.0.1:8000/api/tasks/admin/${id}/update/`,
+            `https://cleanproject-b0mh.onrender.com/api/tasks/admin/${id}/update/`,
 
             {
 

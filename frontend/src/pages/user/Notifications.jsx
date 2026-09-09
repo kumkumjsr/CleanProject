@@ -37,7 +37,7 @@ function Notifications() {
 
             const historyResponse = await axios.get(
 
-                "http://127.0.0.1:8000/api/waste/history/",
+                "https://cleanproject-b0mh.onrender.com/api/waste/history/",
 
                 {
 
@@ -60,7 +60,7 @@ function Notifications() {
 
             const profileResponse = await axios.get(
 
-                "http://127.0.0.1:8000/api/accounts/profile/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/profile/",
 
                 {
 

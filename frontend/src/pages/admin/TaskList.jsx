@@ -21,7 +21,7 @@ try{
 
 const response = await axios.get(
 
-"http://127.0.0.1:8000/api/tasks/admin/",
+"https://cleanproject-b0mh.onrender.com/api/tasks/admin/",
 
 {
 
@@ -83,7 +83,7 @@ try{
 
 await axios.delete(
 
-`http://127.0.0.1:8000/api/tasks/admin/${id}/delete/`,
+`https://cleanproject-b0mh.onrender.com/api/tasks/admin/${id}/delete/`,
 
 {
 

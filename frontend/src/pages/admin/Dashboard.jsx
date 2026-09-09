@@ -54,7 +54,7 @@
 
 //             const response = await axios.get(
 
-//                 "http://127.0.0.1:8000/api/dashboard/admin/",
+//                 "https://cleanproject-b0mh.onrender.com/api/dashboard/admin/",
 
 //                 {
 
@@ -809,7 +809,7 @@
 
 // const response = await axios.get(
 
-// "http://127.0.0.1:8000/api/tasks/admin/stats/",
+// "https://cleanproject-b0mh.onrender.com/api/tasks/admin/stats/",
 
 // {
 
@@ -1132,7 +1132,7 @@ function AdminDashboard() {
 
             const response = await axios.get(
 
-                "http://127.0.0.1:8000/api/dustbins/locations/",
+                "https://cleanproject-b0mh.onrender.com/api/dustbins/locations/",
 
                 {
                     headers: {
@@ -1183,7 +1183,7 @@ function AdminDashboard() {
 
             const response = await axios.get(
 
-                "http://127.0.0.1:8000/api/dashboard/admin/",
+                "https://cleanproject-b0mh.onrender.com/api/dashboard/admin/",
 
                 {
                     headers: {
@@ -1236,7 +1236,7 @@ function AdminDashboard() {
 
             const response = await axios.get(
 
-                "http://127.0.0.1:8000/api/tasks/admin/stats/",
+                "https://cleanproject-b0mh.onrender.com/api/tasks/admin/stats/",
 
                 {
                     headers: {

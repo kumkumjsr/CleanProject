@@ -27,7 +27,7 @@ function EditStaff() {
             const token = localStorage.getItem("access");
 
             const response = await axios.get(
-                "http://127.0.0.1:8000/api/accounts/staff/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/staff/",
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -64,7 +64,7 @@ function EditStaff() {
             const token = localStorage.getItem("access");
 
             await axios.put(
-                `http://127.0.0.1:8000/api/accounts/staff/${id}/update/`,
+                `https://cleanproject-b0mh.onrender.com/api/accounts/staff/${id}/update/`,
                 staff,
                 {
                     headers: {

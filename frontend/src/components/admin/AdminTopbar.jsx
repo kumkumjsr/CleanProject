@@ -33,7 +33,7 @@ function AdminTopbar() {
 
             const response = await axios.get(
 
-                "http://127.0.0.1:8000/api/notifications/",
+                "https://cleanproject-b0mh.onrender.com/api/notifications/",
 
                 {
                     headers: {
@@ -118,7 +118,7 @@ function AdminTopbar() {
 
             const response = await axios.get(
 
-                `http://127.0.0.1:8000/api/accounts/search/?q=${value}`,
+                `https://cleanproject-b0mh.onrender.com/api/accounts/search/?q=${value}`,
 
                 {
                     headers: {

@@ -1,12 +1,9 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/api/waste/";
-
+const API_URL = "https://cleanproject-b0mh.onrender.com/api/waste/";
 
 export const scanWaste = async (formData) => {
-
   const token = localStorage.getItem("access");
-
 
   const response = await axios.post(
     `${API_URL}scan/`,
@@ -19,16 +16,11 @@ export const scanWaste = async (formData) => {
     }
   );
 
-
   return response.data;
 };
 
-
-
 export const getWasteHistory = async () => {
-
   const token = localStorage.getItem("access");
-
 
   const response = await axios.get(
     `${API_URL}history/`,
@@ -38,7 +30,6 @@ export const getWasteHistory = async () => {
       },
     }
   );
-
 
   return response.data;
 };

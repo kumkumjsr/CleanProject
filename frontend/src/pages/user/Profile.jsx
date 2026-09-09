@@ -32,7 +32,7 @@ function Profile() {
             const token = localStorage.getItem("access");
 
             const response = await axios.get(
-                "http://127.0.0.1:8000/api/accounts/profile/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/profile/",
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -142,7 +142,7 @@ function Profile() {
             }
 
             const response = await axios.patch(
-                "http://127.0.0.1:8000/api/accounts/profile/update/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/profile/update/",
                 data,
                 {
                     headers: {
@@ -249,7 +249,7 @@ function Profile() {
                 ? (
                     profile.profile_image.startsWith("http")
                         ? `${profile.profile_image}?t=${new Date().getTime()}`
-                        : `http://127.0.0.1:8000${profile.profile_image}?t=${new Date().getTime()}`
+                        : `https://CLEANPROJECT-B0MH.ONRENDER.COM${profile.profile_image}?t=${new Date().getTime()}`
                 )
                 : null
         );

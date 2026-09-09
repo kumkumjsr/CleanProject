@@ -32,7 +32,7 @@ function Complaints() {
 
             const response = await axios.get(
 
-                "http://127.0.0.1:8000/api/complaints/admin/",
+                "https://cleanproject-b0mh.onrender.com/api/complaints/admin/",
 
                 {
 
@@ -87,7 +87,7 @@ function Complaints() {
 
             await axios.patch(
 
-                `http://127.0.0.1:8000/api/complaints/admin/${id}/status/`,
+                `https://cleanproject-b0mh.onrender.com/api/complaints/admin/${id}/status/`,
 
                 {
                     status:status
@@ -300,7 +300,7 @@ function Complaints() {
                         <img
 
                             src={
-                            `http://127.0.0.1:8000${item.image}`
+                            `https://CLEANPROJECT-B0MH.ONRENDER.COM${item.image}`
                             }
 
                             className="mt-4 w-52 h-40 object-cover rounded-lg"

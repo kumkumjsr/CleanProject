@@ -31,7 +31,7 @@
 
 // await axios.post(
 
-// "http://127.0.0.1:8000/api/accounts/change-password/",
+// "https://cleanproject-b0mh.onrender.com/api/accounts/change-password/",
 
 
 // {
@@ -268,7 +268,7 @@ function ChangePassword(){
 
             const response = await axios.post(
 
-                "http://127.0.0.1:8000/api/accounts/change-password/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/change-password/",
 
 
                 {

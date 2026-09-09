@@ -38,7 +38,7 @@ function Salary() {
   const token = localStorage.getItem("access");
 
   const api = axios.create({
-    baseURL: "http://127.0.0.1:8000/api",
+    baseURL: "https://cleanproject-b0mh.onrender.com/api",
     headers: {
       Authorization: `Bearer ${token}`,
     },

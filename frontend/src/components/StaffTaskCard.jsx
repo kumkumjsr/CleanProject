@@ -196,7 +196,7 @@ function StaffTaskCard({ task, onUpdate }) {
 
                         <img
 
-                            src={`http://127.0.0.1:8000${task.before_image}`}
+                            src={`https://CLEANPROJECT-B0MH.ONRENDER.COM${task.before_image}`}
 
                             alt="Before Cleaning"
 
@@ -256,7 +256,7 @@ function StaffTaskCard({ task, onUpdate }) {
 
                             <img
 
-                                src={`http://127.0.0.1:8000${task.before_image}`}
+                                src={`https://CLEANPROJECT-B0MH.ONRENDER.COM${task.before_image}`}
 
                                 alt="Before Cleaning"
 
@@ -281,7 +281,7 @@ function StaffTaskCard({ task, onUpdate }) {
 
                             <img
 
-                                src={`http://127.0.0.1:8000${task.after_image}`}
+                                src={`https://CLEANPROJECT-B0MH.ONRENDER.COM${task.after_image}`}
 
                                 alt="After Cleaning"
 

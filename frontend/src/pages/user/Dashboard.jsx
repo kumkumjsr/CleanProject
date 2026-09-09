@@ -39,7 +39,7 @@
 
 //       const response = await axios.get(
 
-//         "http://127.0.0.1:8000/api/dashboard/user/dashboard/",
+//         "https://cleanproject-b0mh.onrender.com/api/dashboard/user/dashboard/",
 
 //         {
 
@@ -511,7 +511,7 @@
 //                   <img
 
 //                     src={
-//                       `http://127.0.0.1:8000${scan.image}`
+//                       `https://CLEANPROJECT-B0MH.ONRENDER.COM${scan.image}`
 //                     }
 
 //                     className="w-24 h-24 object-cover rounded-lg"
@@ -639,7 +639,7 @@ function UserDashboard() {
       const token = localStorage.getItem("access");
 
       const response = await axios.get(
-        "http://127.0.0.1:8000/api/dashboard/user/dashboard/",
+        "https://cleanproject-b0mh.onrender.com/api/dashboard/user/dashboard/",
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -680,7 +680,7 @@ function UserDashboard() {
       const token = localStorage.getItem("access");
 
       const response = await axios.get(
-        "http://127.0.0.1:8000/api/waste/history/",
+        "https://cleanproject-b0mh.onrender.com/api/waste/history/",
         {
           headers: {
             Authorization: `Bearer ${token}`

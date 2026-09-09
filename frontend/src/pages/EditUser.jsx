@@ -51,7 +51,7 @@ function EditUser() {
 
       const response = await axios.get(
 
-        "http://127.0.0.1:8000/api/accounts/users/",
+        "https://cleanproject-b0mh.onrender.com/api/accounts/users/",
 
         {
 
@@ -133,7 +133,7 @@ function EditUser() {
       await axios.put(
 
 
-        `http://127.0.0.1:8000/api/accounts/users/${id}/update/`,
+        `https://cleanproject-b0mh.onrender.com/api/accounts/users/${id}/update/`,
 
 
         user,

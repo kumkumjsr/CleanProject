@@ -36,7 +36,7 @@ try{
 
 const response = await axios.get(
 
-"http://127.0.0.1:8000/api/notifications/",
+"https://cleanproject-b0mh.onrender.com/api/notifications/",
 
 {
     headers
@@ -87,7 +87,7 @@ try{
 
 await axios.patch(
 
-`http://127.0.0.1:8000/api/notifications/${id}/read/`,
+`https://cleanproject-b0mh.onrender.com/api/notifications/${id}/read/`,
 
 {},
 
@@ -127,7 +127,7 @@ try{
 
 await axios.patch(
 
-"http://127.0.0.1:8000/api/notifications/read-all/",
+"https://cleanproject-b0mh.onrender.com/api/notifications/read-all/",
 
 {},
 
@@ -168,7 +168,7 @@ try{
 
 await axios.delete(
 
-`http://127.0.0.1:8000/api/notifications/${id}/delete/`,
+`https://cleanproject-b0mh.onrender.com/api/notifications/${id}/delete/`,
 
 {
     headers

@@ -1,22 +1,14 @@
 import axios from "axios";
 
-
-const API = "http://127.0.0.1:8000/api";
-
+const API = "https://cleanproject-b0mh.onrender.com/api";
 
 const getAuthHeader = () => {
-
     return {
-
         headers: {
-
             Authorization:
                 `Bearer ${localStorage.getItem("access")}`
-
         }
-
     };
-
 };
 
 
@@ -32,7 +24,6 @@ export const getStaffTasks = async () => {
     );
 
     return response.data;
-
 };
 
 
@@ -58,7 +49,6 @@ export const updateTaskStatus = async (
     );
 
     return response.data;
-
 };
 
 
@@ -79,7 +69,6 @@ export const startTask = async (
         beforeImage
     );
 
-
     const response = await axios.patch(
 
         `${API}/tasks/start/${id}/`,
@@ -87,7 +76,6 @@ export const startTask = async (
         formData,
 
         {
-
             headers: {
 
                 Authorization:
@@ -97,14 +85,11 @@ export const startTask = async (
                     "multipart/form-data"
 
             }
-
         }
 
     );
 
-
     return response.data;
-
 };
 
 
@@ -125,7 +110,6 @@ export const completeTask = async (
         formData,
 
         {
-
             headers: {
 
                 Authorization:
@@ -135,14 +119,11 @@ export const completeTask = async (
                     "multipart/form-data"
 
             }
-
         }
 
     );
 
-
     return response.data;
-
 };
 
 
@@ -160,7 +141,5 @@ export const getStaffStats = async () => {
 
     );
 
-
     return response.data;
-
 };

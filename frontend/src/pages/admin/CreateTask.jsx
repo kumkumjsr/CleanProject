@@ -30,7 +30,7 @@
 
 // const res = await axios.get(
 
-// "http://127.0.0.1:8000/api/accounts/staff/",
+// "https://cleanproject-b0mh.onrender.com/api/accounts/staff/",
 
 // {
 
@@ -107,7 +107,7 @@
 
 // await axios.post(
 
-// "http://127.0.0.1:8000/api/tasks/create/",
+// "https://cleanproject-b0mh.onrender.com/api/tasks/create/",
 
 // form,
 
@@ -419,12 +419,12 @@
 //                 await Promise.all([
 
 //                     axios.get(
-//                         "http://127.0.0.1:8000/api/dustbins/reported/",
+//                         "https://cleanproject-b0mh.onrender.com/api/dustbins/reported/",
 //                         getHeaders()
 //                     ),
 
 //                     axios.get(
-//                         "http://127.0.0.1:8000/api/employees/available/",
+//                         "https://cleanproject-b0mh.onrender.com/api/employees/available/",
 //                         getHeaders()
 //                     )
 
@@ -521,7 +521,7 @@
 
 //             const response = await axios.post(
 
-//                 "http://127.0.0.1:8000/api/tasks/create/",
+//                 "https://cleanproject-b0mh.onrender.com/api/tasks/create/",
 
 //                 {
 
@@ -1046,7 +1046,7 @@ function CreateTask() {
         worker_id: ""
     });
 
-    const API = "http://127.0.0.1:8000";
+    const API = "https://CLEANPROJECT-B0MH.ONRENDER.COM";
 
 
 

@@ -32,7 +32,7 @@ function UserList() {
 
       const response = await axios.get(
 
-        "http://127.0.0.1:8000/api/accounts/users/",
+        "https://cleanproject-b0mh.onrender.com/api/accounts/users/",
 
         {
 
@@ -86,7 +86,7 @@ function UserList() {
 
       await axios.delete(
 
-        `http://127.0.0.1:8000/api/accounts/users/${id}/delete/`,
+        `https://cleanproject-b0mh.onrender.com/api/accounts/users/${id}/delete/`,
 
         {
 

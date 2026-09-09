@@ -73,22 +73,22 @@ function Reports() {
             ] = await Promise.all([
 
                 axios.get(
-                    "http://127.0.0.1:8000/api/tasks/reports/",
+                    "https://cleanproject-b0mh.onrender.com/api/tasks/reports/",
                     { headers }
                 ),
 
                 axios.get(
-                    "http://127.0.0.1:8000/api/tasks/reports/staff/",
+                    "https://cleanproject-b0mh.onrender.com/api/tasks/reports/staff/",
                     { headers }
                 ),
 
                 axios.get(
-                    "http://127.0.0.1:8000/api/tasks/reports/waste/",
+                    "https://cleanproject-b0mh.onrender.com/api/tasks/reports/waste/",
                     { headers }
                 ),
 
                 axios.get(
-                    "http://127.0.0.1:8000/api/tasks/reports/area/",
+                    "https://cleanproject-b0mh.onrender.com/api/tasks/reports/area/",
                     { headers }
                 ),
 

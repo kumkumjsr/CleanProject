@@ -23,7 +23,7 @@ function Salary() {
 
             const res = await axios.get(
 
-                "http://127.0.0.1:8000/api/accounts/staff/salary/",
+                "https://cleanproject-b0mh.onrender.com/api/accounts/staff/salary/",
 
                 {
                     headers:{
