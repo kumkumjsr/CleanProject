@@ -31,8 +31,8 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "192.168.31.116",
+    "cleanproject-b0mh.onrender.com",
 ]
-
 
 # ============================================================
 # APPLICATIONS
