@@ -5,7 +5,6 @@ import { registerUser } from "../services/authService";
 function Register() {
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -26,11 +25,10 @@ function Register() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (loading) return;
-
+    // Password validation
     if (formData.password !== formData.confirm_password) {
       alert("Passwords do not match.");
       return;
@@ -41,58 +39,28 @@ function Register() {
       return;
     }
 
-    setLoading(true);
+    // Data for backend
+    const dataToSend = {
+      first_name: formData.first_name.trim(),
+      last_name: formData.last_name.trim(),
+      username: formData.username.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      address: formData.address.trim(),
+      password: formData.password,
+    };
 
-    try {
-      // Don't send confirm_password to backend
-      const dataToSend = {
-        first_name: formData.first_name.trim(),
-        last_name: formData.last_name.trim(),
-        username: formData.username.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
-        address: formData.address.trim(),
-        password: formData.password,
-      };
+    // Open Login page immediately
+    navigate("/login", { replace: true });
 
-      await registerUser(dataToSend);
-
-      // Account successfully created
-      alert("Registration Successful! 🎉");
-
-      // Go to login immediately
-      navigate("/login", { replace: true });
-
-    } catch (error) {
-      console.error("Registration Error:", error);
-
-      if (error.response) {
-        console.error("Backend Response:", error.response.data);
-
-        const backendError = error.response.data;
-
-        if (typeof backendError === "object") {
-          alert(
-            Object.entries(backendError)
-              .map(([key, value]) => `${key}: ${value}`)
-              .join("\n")
-          );
-        } else {
-          alert(String(backendError));
-        }
-      } else if (error.code === "ECONNABORTED") {
-        alert(
-          "Server response is taking too long. Please try Login once."
-        );
-      } else {
-        alert(
-          "Registration request failed. Please check your internet connection and try again."
-        );
-      }
-
-    } finally {
-      setLoading(false);
-    }
+    // Create account in background
+    registerUser(dataToSend)
+      .then((response) => {
+        console.log("Account created successfully:", response);
+      })
+      .catch((error) => {
+        console.error("Registration Error:", error);
+      });
   };
 
   return (
@@ -100,6 +68,7 @@ function Register() {
 
       <div className="w-full max-w-3xl bg-white shadow-2xl rounded-2xl p-8">
 
+        {/* Header */}
         <div className="text-center mb-8">
 
           <h1 className="text-4xl font-bold text-green-700">
@@ -112,6 +81,7 @@ function Register() {
 
         </div>
 
+        {/* Registration Form */}
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-5"
@@ -269,17 +239,14 @@ function Register() {
 
           </div>
 
-          {/* Register Button */}
+          {/* Create Account Button */}
           <div className="md:col-span-2">
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 rounded-lg font-semibold transition duration-300"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition duration-300"
             >
-              {loading
-                ? "Creating Account... Please wait"
-                : "Register"}
+              Create Account
             </button>
 
           </div>
@@ -311,6 +278,4 @@ function Register() {
 }
 
 export default Register;
-
-
 
