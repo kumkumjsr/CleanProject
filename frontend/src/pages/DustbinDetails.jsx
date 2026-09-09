@@ -469,7 +469,6 @@
 
 
 
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -477,10 +476,15 @@ import axios from "axios";
 function DustbinDetails() {
     const { binId } = useParams();
 
-    // ================================
+    // ==========================================
     // RENDER BACKEND URL
-    // ================================
+    // ==========================================
+
     const BASEURL = "https://cleanproject-b0mh.onrender.com";
+
+    // ==========================================
+    // STATES
+    // ==========================================
 
     const [dustbin, setDustbin] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -498,7 +502,7 @@ function DustbinDetails() {
     const [complaintImage, setComplaintImage] = useState(null);
 
     // ==========================================
-    // FETCH DUSTBIN
+    // FETCH DUSTBIN DETAILS
     // ==========================================
 
     useEffect(() => {
@@ -548,8 +552,20 @@ function DustbinDetails() {
         try {
             setReporting(true);
 
+            const token = localStorage.getItem("access");
+
+            const headers = {};
+
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+
             const response = await axios.post(
-                `${BASEURL}/api/dustbins/${dustbin.id}/report/`
+                `${BASEURL}/api/dustbins/${dustbin.id}/report/`,
+                {},
+                {
+                    headers,
+                }
             );
 
             alert(
@@ -617,28 +633,57 @@ function DustbinDetails() {
     const handleComplaintSubmit = async (e) => {
         e.preventDefault();
 
+        // ------------------------------------------
+        // CHECK DUSTBIN
+        // ------------------------------------------
+
         if (!dustbin) {
+            alert("Dustbin information is not available.");
             return;
         }
+
+        // ------------------------------------------
+        // CHECK COMPLAINT TITLE
+        // ------------------------------------------
 
         if (!complaintTitle.trim()) {
             alert("Please select complaint type.");
             return;
         }
 
+        // ------------------------------------------
+        // CHECK DESCRIPTION
+        // ------------------------------------------
+
         if (!complaintDescription.trim()) {
             alert("Please describe the problem.");
+            return;
+        }
+
+        // ------------------------------------------
+        // CHECK DUSTBIN ID
+        // ------------------------------------------
+
+        if (!dustbin.id) {
+            alert("Dustbin ID is missing.");
+            console.error("Dustbin data:", dustbin);
             return;
         }
 
         try {
             setSubmittingComplaint(true);
 
+            // ------------------------------------------
+            // CREATE FORM DATA
+            // ------------------------------------------
+
             const formData = new FormData();
 
+            // ✅ IMPORTANT
+            // Backend expects "dustbin_id"
             formData.append(
-                "dustbin",
-                dustbin.id
+                "dustbin_id",
+                String(dustbin.id)
             );
 
             formData.append(
@@ -651,6 +696,7 @@ function DustbinDetails() {
                 complaintDescription
             );
 
+            // Optional image
             if (complaintImage) {
                 formData.append(
                     "image",
@@ -658,10 +704,49 @@ function DustbinDetails() {
                 );
             }
 
+            // ------------------------------------------
+            // JWT TOKEN
+            // ------------------------------------------
+
+            const token = localStorage.getItem("access");
+
+            if (!token) {
+                alert("Please login first to submit a complaint.");
+                setSubmittingComplaint(false);
+                return;
+            }
+
+            // ------------------------------------------
+            // DEBUG
+            // ------------------------------------------
+
+            console.log(
+                "Submitting complaint for Dustbin ID:",
+                dustbin.id
+            );
+
+            console.log(
+                "Dustbin ID sent as dustbin_id:",
+                dustbin.id
+            );
+
+            // ------------------------------------------
+            // SEND REQUEST
+            // ------------------------------------------
+
             const response = await axios.post(
                 `${BASEURL}/api/complaints/create/`,
-                formData
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
             );
+
+            // ------------------------------------------
+            // SUCCESS
+            // ------------------------------------------
 
             alert(
                 response.data?.message ||
@@ -697,7 +782,9 @@ function DustbinDetails() {
                 );
 
             } else {
-                alert("Unable to submit complaint.");
+                alert(
+                    "Unable to submit complaint."
+                );
             }
 
         } finally {
@@ -712,7 +799,9 @@ function DustbinDetails() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-green-50">
+
                 <div className="text-center">
+
                     <div className="text-4xl mb-3">
                         ♻️
                     </div>
@@ -720,7 +809,9 @@ function DustbinDetails() {
                     <p className="text-gray-600">
                         Loading dustbin details...
                     </p>
+
                 </div>
+
             </div>
         );
     }
@@ -732,6 +823,7 @@ function DustbinDetails() {
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-red-50 px-4">
+
                 <div className="bg-white shadow-lg rounded-2xl p-8 text-center max-w-md w-full">
 
                     <div className="text-5xl mb-4">
@@ -751,6 +843,7 @@ function DustbinDetails() {
                     </p>
 
                 </div>
+
             </div>
         );
     }
@@ -764,7 +857,9 @@ function DustbinDetails() {
 
             <div className="max-w-3xl mx-auto">
 
-                {/* HEADER */}
+                {/* ==========================================
+                    HEADER
+                ========================================== */}
 
                 <div className="text-center mb-8">
 
@@ -782,11 +877,15 @@ function DustbinDetails() {
 
                 </div>
 
-                {/* MAIN CARD */}
+                {/* ==========================================
+                    MAIN CARD
+                ========================================== */}
 
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
 
-                    {/* STATUS */}
+                    {/* ==========================================
+                        STATUS
+                    ========================================== */}
 
                     <div
                         className={`p-6 text-center ${
@@ -816,7 +915,9 @@ function DustbinDetails() {
 
                     </div>
 
-                    {/* DETAILS */}
+                    {/* ==========================================
+                        DETAILS
+                    ========================================== */}
 
                     <div className="p-6 md:p-8">
 
@@ -938,20 +1039,24 @@ function DustbinDetails() {
 
                         </div>
 
-                        {/* REPORT FULL */}
+                        {/* ==========================================
+                            REPORT FULL
+                        ========================================== */}
 
                         {dustbin.status !== "FULL" ? (
 
                             <div className="mt-8 border-t pt-8">
 
-                                <div className="
-                                    bg-yellow-50
-                                    border
-                                    border-yellow-200
-                                    rounded-2xl
-                                    p-5
-                                    text-center
-                                ">
+                                <div
+                                    className="
+                                        bg-yellow-50
+                                        border
+                                        border-yellow-200
+                                        rounded-2xl
+                                        p-5
+                                        text-center
+                                    "
+                                >
 
                                     <div className="text-3xl mb-2">
                                         🚨
@@ -997,14 +1102,16 @@ function DustbinDetails() {
 
                             <div className="mt-8 border-t pt-8">
 
-                                <div className="
-                                    bg-red-50
-                                    border
-                                    border-red-200
-                                    rounded-2xl
-                                    p-5
-                                    text-center
-                                ">
+                                <div
+                                    className="
+                                        bg-red-50
+                                        border
+                                        border-red-200
+                                        rounded-2xl
+                                        p-5
+                                        text-center
+                                    "
+                                >
 
                                     <div className="text-3xl mb-2">
                                         ✅
@@ -1019,37 +1126,44 @@ function DustbinDetails() {
                                         Collection has been prioritized.
                                     </p>
 
-                                    <div className="
-                                        mt-4
-                                        inline-block
-                                        bg-red-600
-                                        text-white
-                                        px-4
-                                        py-2
-                                        rounded-full
-                                        text-sm
-                                        font-bold
-                                    ">
+                                    <div
+                                        className="
+                                            mt-4
+                                            inline-block
+                                            bg-red-600
+                                            text-white
+                                            px-4
+                                            py-2
+                                            rounded-full
+                                            text-sm
+                                            font-bold
+                                        "
+                                    >
                                         HIGH PRIORITY
                                     </div>
 
                                 </div>
 
                             </div>
+
                         )}
 
-                        {/* REPORT COMPLAINT */}
+                        {/* ==========================================
+                            REPORT COMPLAINT
+                        ========================================== */}
 
                         <div className="mt-6">
 
-                            <div className="
-                                bg-blue-50
-                                border
-                                border-blue-200
-                                rounded-2xl
-                                p-5
-                                text-center
-                            ">
+                            <div
+                                className="
+                                    bg-blue-50
+                                    border
+                                    border-blue-200
+                                    rounded-2xl
+                                    p-5
+                                    text-center
+                                "
+                            >
 
                                 <div className="text-3xl mb-2">
                                     📝
@@ -1086,7 +1200,9 @@ function DustbinDetails() {
 
                         </div>
 
-                        {/* QR IMAGE */}
+                        {/* ==========================================
+                            QR IMAGE
+                        ========================================== */}
 
                         {dustbin.qr_code && (
 
@@ -1131,19 +1247,23 @@ function DustbinDetails() {
                     "
                 >
 
-                    <div className="
-                        bg-white
-                        rounded-2xl
-                        shadow-2xl
-                        w-full
-                        max-w-lg
-                        max-h-[90vh]
-                        overflow-y-auto
-                        p-6
-                        md:p-8
-                    ">
+                    <div
+                        className="
+                            bg-white
+                            rounded-2xl
+                            shadow-2xl
+                            w-full
+                            max-w-lg
+                            max-h-[90vh]
+                            overflow-y-auto
+                            p-6
+                            md:p-8
+                        "
+                    >
 
-                        {/* MODAL HEADER */}
+                        {/* ==========================================
+                            MODAL HEADER
+                        ========================================== */}
 
                         <div className="flex items-center justify-between mb-6">
 
@@ -1178,24 +1298,28 @@ function DustbinDetails() {
 
                         </div>
 
-                        {/* COMPLAINT FORM */}
+                        {/* ==========================================
+                            COMPLAINT FORM
+                        ========================================== */}
 
                         <form
                             onSubmit={handleComplaintSubmit}
                             className="space-y-5"
                         >
 
-                            {/* TITLE */}
+                            {/* COMPLAINT TYPE */}
 
                             <div>
 
-                                <label className="
-                                    block
-                                    text-sm
-                                    font-semibold
-                                    text-gray-700
-                                    mb-2
-                                ">
+                                <label
+                                    className="
+                                        block
+                                        text-sm
+                                        font-semibold
+                                        text-gray-700
+                                        mb-2
+                                    "
+                                >
                                     Complaint Type
                                 </label>
 
@@ -1262,13 +1386,15 @@ function DustbinDetails() {
 
                             <div>
 
-                                <label className="
-                                    block
-                                    text-sm
-                                    font-semibold
-                                    text-gray-700
-                                    mb-2
-                                ">
+                                <label
+                                    className="
+                                        block
+                                        text-sm
+                                        font-semibold
+                                        text-gray-700
+                                        mb-2
+                                    "
+                                >
                                     Description
                                 </label>
 
@@ -1300,13 +1426,15 @@ function DustbinDetails() {
 
                             <div>
 
-                                <label className="
-                                    block
-                                    text-sm
-                                    font-semibold
-                                    text-gray-700
-                                    mb-2
-                                ">
+                                <label
+                                    className="
+                                        block
+                                        text-sm
+                                        font-semibold
+                                        text-gray-700
+                                        mb-2
+                                    "
+                                >
                                     Upload Photo
                                     <span className="text-gray-400 font-normal">
                                         {" "}
@@ -1333,24 +1461,30 @@ function DustbinDetails() {
                                 />
 
                                 {complaintImage && (
-                                    <p className="
-                                        text-xs
-                                        text-green-600
-                                        mt-2
-                                    ">
+
+                                    <p
+                                        className="
+                                            text-xs
+                                            text-green-600
+                                            mt-2
+                                        "
+                                    >
                                         ✅ {complaintImage.name}
                                     </p>
+
                                 )}
 
                             </div>
 
                             {/* DUSTBIN INFO */}
 
-                            <div className="
-                                bg-gray-50
-                                rounded-xl
-                                p-4
-                            ">
+                            <div
+                                className="
+                                    bg-gray-50
+                                    rounded-xl
+                                    p-4
+                                "
+                            >
 
                                 <p className="text-xs text-gray-500">
                                     COMPLAINT FOR
@@ -1368,16 +1502,24 @@ function DustbinDetails() {
                                     📍 {dustbin.address}
                                 </p>
 
+                                {/* INTERNAL DATABASE ID */}
+
+                                <p className="text-xs text-gray-400 mt-2">
+                                    Dustbin ID: {dustbin.id}
+                                </p>
+
                             </div>
 
                             {/* BUTTONS */}
 
-                            <div className="
-                                flex
-                                flex-col
-                                md:flex-row
-                                gap-3
-                            ">
+                            <div
+                                className="
+                                    flex
+                                    flex-col
+                                    md:flex-row
+                                    gap-3
+                                "
+                            >
 
                                 <button
                                     type="button"
@@ -1424,6 +1566,7 @@ function DustbinDetails() {
                     </div>
 
                 </div>
+
             )}
 
         </div>
