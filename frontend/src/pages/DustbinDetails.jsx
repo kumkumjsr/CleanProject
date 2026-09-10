@@ -1,475 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import axios from "axios";
-
-// function DustbinDetails() {
-//     const { binId } = useParams();
-
-//     const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
-
-//     const [dustbin, setDustbin] = useState(null);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState("");
-
-//     // Report button loading
-//     const [reporting, setReporting] = useState(false);
-
-//     useEffect(() => {
-//         const fetchDustbin = async () => {
-//             try {
-//                 setLoading(true);
-//                 setError("");
-
-//                 const response = await axios.get(
-//                     `${BASEURL}/api/dustbins/qr/${binId}/`
-//                 );
-
-//                 setDustbin(response.data);
-
-//             } catch (err) {
-//                 console.error("Dustbin fetch error:", err);
-
-//                 if (err.response?.status === 404) {
-//                     setError("Dustbin not found.");
-//                 } else {
-//                     setError("Unable to load dustbin details.");
-//                 }
-
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-
-//         if (binId) {
-//             fetchDustbin();
-//         }
-//     }, [binId, BASEURL]);
-
-
-//     // REPORT DUSTBIN AS FULL
-//     const handleReportFull = async () => {
-
-//         if (!dustbin) {
-//             return;
-//         }
-
-//         try {
-
-//             setReporting(true);
-
-//             const response = await axios.post(
-//                 `${BASEURL}/api/dustbins/${dustbin.id}/report/`
-//             );
-
-//             alert(
-//                 response.data?.message ||
-//                 "Dustbin reported as full successfully."
-//             );
-
-//             // Update UI immediately
-//             setDustbin((prev) => ({
-//                 ...prev,
-//                 is_full: true,
-//                 status: "FULL",
-//                 priority_level: "HIGH",
-//                 priority_score: 100,
-//             }));
-
-//         } catch (err) {
-
-//             console.error(
-//                 "Report dustbin error:",
-//                 err.response?.data || err
-//             );
-
-//             alert(
-//                 err.response?.data?.error ||
-//                 err.response?.data?.detail ||
-//                 "Unable to report dustbin."
-//             );
-
-//         } finally {
-
-//             setReporting(false);
-
-//         }
-//     };
-
-
-//     if (loading) {
-//         return (
-//             <div className="min-h-screen flex items-center justify-center bg-green-50">
-
-//                 <div className="text-center">
-
-//                     <div className="text-4xl mb-3">
-//                         ♻️
-//                     </div>
-
-//                     <p className="text-gray-600">
-//                         Loading dustbin details...
-//                     </p>
-
-//                 </div>
-
-//             </div>
-//         );
-//     }
-
-
-//     if (error) {
-//         return (
-//             <div className="min-h-screen flex items-center justify-center bg-red-50 px-4">
-
-//                 <div className="bg-white shadow-lg rounded-2xl p-8 text-center max-w-md w-full">
-
-//                     <div className="text-5xl mb-4">
-//                         ❌
-//                     </div>
-
-//                     <h1 className="text-2xl font-bold text-red-600 mb-2">
-//                         Dustbin Not Found
-//                     </h1>
-
-//                     <p className="text-gray-600">
-//                         {error}
-//                     </p>
-
-//                     <p className="text-sm text-gray-400 mt-4">
-//                         BIN ID: {binId}
-//                     </p>
-
-//                 </div>
-
-//             </div>
-//         );
-//     }
-
-
-//     return (
-//         <div className="min-h-screen bg-green-50 py-10 px-4">
-
-//             <div className="max-w-3xl mx-auto">
-
-//                 {/* HEADER */}
-
-//                 <div className="text-center mb-8">
-
-//                     <div className="text-5xl mb-3">
-//                         ♻️
-//                     </div>
-
-//                     <h1 className="text-3xl font-bold text-green-700">
-//                         EcoSmart Dustbin
-//                     </h1>
-
-//                     <p className="text-gray-500 mt-2">
-//                         Smart Dustbin Information
-//                     </p>
-
-//                 </div>
-
-
-//                 {/* MAIN CARD */}
-
-//                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-
-//                     {/* STATUS */}
-
-//                     <div
-//                         className={`p-6 text-center ${
-//                             dustbin.status === "FULL"
-//                                 ? "bg-red-100"
-//                                 : "bg-green-100"
-//                         }`}
-//                     >
-
-//                         <div className="text-4xl mb-2">
-//                             {dustbin.status === "FULL"
-//                                 ? "🔴"
-//                                 : "🟢"}
-//                         </div>
-
-//                         <h2
-//                             className={`text-xl font-bold ${
-//                                 dustbin.status === "FULL"
-//                                     ? "text-red-700"
-//                                     : "text-green-700"
-//                             }`}
-//                         >
-//                             {dustbin.status === "FULL"
-//                                 ? "Dustbin is FULL"
-//                                 : "Dustbin is AVAILABLE"}
-//                         </h2>
-
-//                     </div>
-
-
-//                     {/* DETAILS */}
-
-//                     <div className="p-6 md:p-8">
-
-//                         <h2 className="text-2xl font-bold text-gray-800 mb-6">
-//                             {dustbin.name}
-//                         </h2>
-
-
-//                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-//                             {/* BIN ID */}
-
-//                             <div className="bg-gray-50 rounded-xl p-4">
-
-//                                 <p className="text-sm text-gray-500">
-//                                     BIN ID
-//                                 </p>
-
-//                                 <p className="font-bold text-green-700 mt-1">
-//                                     {dustbin.bin_id}
-//                                 </p>
-
-//                             </div>
-
-
-//                             {/* TYPE */}
-
-//                             <div className="bg-gray-50 rounded-xl p-4">
-
-//                                 <p className="text-sm text-gray-500">
-//                                     Waste Type
-//                                 </p>
-
-//                                 <p className="font-semibold text-gray-800 mt-1">
-//                                     {dustbin.dustbin_type}
-//                                 </p>
-
-//                             </div>
-
-
-//                             {/* ADDRESS */}
-
-//                             <div className="bg-gray-50 rounded-xl p-4 md:col-span-2">
-
-//                                 <p className="text-sm text-gray-500">
-//                                     Address
-//                                 </p>
-
-//                                 <p className="font-semibold text-gray-800 mt-1">
-//                                     📍 {dustbin.address}
-//                                 </p>
-
-//                             </div>
-
-
-//                             {/* LATITUDE */}
-
-//                             <div className="bg-gray-50 rounded-xl p-4">
-
-//                                 <p className="text-sm text-gray-500">
-//                                     Latitude
-//                                 </p>
-
-//                                 <p className="font-semibold text-gray-800 mt-1">
-//                                     {dustbin.latitude}
-//                                 </p>
-
-//                             </div>
-
-
-//                             {/* LONGITUDE */}
-
-//                             <div className="bg-gray-50 rounded-xl p-4">
-
-//                                 <p className="text-sm text-gray-500">
-//                                     Longitude
-//                                 </p>
-
-//                                 <p className="font-semibold text-gray-800 mt-1">
-//                                     {dustbin.longitude}
-//                                 </p>
-
-//                             </div>
-
-
-//                             {/* PRIORITY */}
-
-//                             <div className="bg-gray-50 rounded-xl p-4">
-
-//                                 <p className="text-sm text-gray-500">
-//                                     Priority Level
-//                                 </p>
-
-//                                 <p
-//                                     className={`font-bold mt-1 ${
-//                                         dustbin.priority_level === "HIGH"
-//                                             ? "text-red-600"
-//                                             : "text-gray-800"
-//                                     }`}
-//                                 >
-//                                     {dustbin.priority_level}
-//                                 </p>
-
-//                             </div>
-
-
-//                             {/* PRIORITY SCORE */}
-
-//                             <div className="bg-gray-50 rounded-xl p-4">
-
-//                                 <p className="text-sm text-gray-500">
-//                                     Priority Score
-//                                 </p>
-
-//                                 <p
-//                                     className={`font-bold mt-1 ${
-//                                         dustbin.priority_score >= 100
-//                                             ? "text-red-600"
-//                                             : "text-gray-800"
-//                                     }`}
-//                                 >
-//                                     {dustbin.priority_score}
-//                                 </p>
-
-//                             </div>
-
-//                         </div>
-
-
-//                         {/* REPORT FULL BUTTON */}
-
-//                         {dustbin.status !== "FULL" ? (
-
-//                             <div className="mt-8 border-t pt-8">
-
-//                                 <div className="
-//                                     bg-yellow-50
-//                                     border
-//                                     border-yellow-200
-//                                     rounded-2xl
-//                                     p-5
-//                                     text-center
-//                                 ">
-
-//                                     <div className="text-3xl mb-2">
-//                                         🚨
-//                                     </div>
-
-//                                     <h3 className="text-lg font-bold text-gray-800">
-//                                         Dustbin is Full?
-//                                     </h3>
-
-//                                     <p className="text-sm text-gray-600 mt-2 mb-4">
-//                                         If this dustbin is full, report it
-//                                         to EcoSmart for quick collection.
-//                                     </p>
-
-//                                     <button
-//                                         onClick={handleReportFull}
-//                                         disabled={reporting}
-//                                         className="
-//                                             w-full
-//                                             md:w-auto
-//                                             px-8
-//                                             py-3
-//                                             bg-red-600
-//                                             hover:bg-red-700
-//                                             disabled:bg-red-300
-//                                             disabled:cursor-not-allowed
-//                                             text-white
-//                                             rounded-xl
-//                                             font-bold
-//                                             transition
-//                                         "
-//                                     >
-//                                         {reporting
-//                                             ? "Reporting..."
-//                                             : "🚨 Report as FULL"}
-//                                     </button>
-
-//                                 </div>
-
-//                             </div>
-
-//                         ) : (
-
-//                             <div className="mt-8 border-t pt-8">
-
-//                                 <div className="
-//                                     bg-red-50
-//                                     border
-//                                     border-red-200
-//                                     rounded-2xl
-//                                     p-5
-//                                     text-center
-//                                 ">
-
-//                                     <div className="text-3xl mb-2">
-//                                         ✅
-//                                     </div>
-
-//                                     <h3 className="text-lg font-bold text-red-700">
-//                                         Full Dustbin Reported
-//                                     </h3>
-
-//                                     <p className="text-sm text-gray-600 mt-2">
-//                                         This dustbin has been marked as FULL.
-//                                         Collection has been prioritized.
-//                                     </p>
-
-//                                     <div className="
-//                                         mt-4
-//                                         inline-block
-//                                         bg-red-600
-//                                         text-white
-//                                         px-4
-//                                         py-2
-//                                         rounded-full
-//                                         text-sm
-//                                         font-bold
-//                                     ">
-//                                         HIGH PRIORITY
-//                                     </div>
-
-//                                 </div>
-
-//                             </div>
-
-//                         )}
-
-
-//                         {/* QR IMAGE */}
-
-//                         {dustbin.qr_code && (
-//                             <div className="mt-8 text-center border-t pt-8">
-
-//                                 <h3 className="text-lg font-bold text-gray-700 mb-4">
-//                                     Dustbin QR Code
-//                                 </h3>
-
-//                                 <img
-//                                     src={dustbin.qr_code}
-//                                     alt={`QR Code for ${dustbin.bin_id}`}
-//                                     className="w-48 h-48 mx-auto border rounded-xl p-2"
-//                                 />
-
-//                             </div>
-//                         )}
-
-//                     </div>
-
-//                 </div>
-
-//             </div>
-
-//         </div>
-//     );
-// }
-
-// export default DustbinDetails;
-
-
-
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -629,32 +157,27 @@ function DustbinDetails() {
     const handleComplaintSubmit = async (e) => {
         e.preventDefault();
 
-        // Dustbin check
         if (!dustbin) {
             alert("Dustbin information is not available.");
             return;
         }
 
-        // Internal database ID check
         if (!dustbin.id) {
             console.error("Complete dustbin data:", dustbin);
             alert("Dustbin database ID is missing.");
             return;
         }
 
-        // Title check
         if (!complaintTitle.trim()) {
             alert("Please select complaint type.");
             return;
         }
 
-        // Description check
         if (!complaintDescription.trim()) {
             alert("Please describe the problem.");
             return;
         }
 
-        // Token check
         const token = localStorage.getItem("access");
 
         if (!token) {
@@ -665,13 +188,8 @@ function DustbinDetails() {
         try {
             setSubmittingComplaint(true);
 
-            // ==========================================
-            // CREATE FORMDATA
-            // ==========================================
-
             const formData = new FormData();
 
-            // VERY IMPORTANT
             formData.append(
                 "dustbin_id",
                 String(dustbin.id)
@@ -687,7 +205,6 @@ function DustbinDetails() {
                 complaintDescription.trim()
             );
 
-            // Send location also if required by serializer/model
             if (dustbin.address) {
                 formData.append(
                     "location",
@@ -695,17 +212,12 @@ function DustbinDetails() {
                 );
             }
 
-            // Optional image
             if (complaintImage) {
                 formData.append(
                     "image",
                     complaintImage
                 );
             }
-
-            // ==========================================
-            // DEBUG FORMDATA
-            // ==========================================
 
             console.log("========== COMPLAINT DATA ==========");
 
@@ -730,10 +242,6 @@ function DustbinDetails() {
 
             console.log("====================================");
 
-            // ==========================================
-            // SEND REQUEST
-            // ==========================================
-
             const response = await axios.post(
                 `${BASEURL}/api/complaints/create/`,
                 formData,
@@ -749,17 +257,12 @@ function DustbinDetails() {
                 response.data
             );
 
-            // ==========================================
-            // SUCCESS
-            // ==========================================
-
             alert(
                 response.data?.message ||
                 "Complaint submitted successfully."
             );
 
             setShowComplaint(false);
-
             setComplaintTitle("");
             setComplaintDescription("");
             setComplaintImage(null);
@@ -795,6 +298,39 @@ function DustbinDetails() {
         } finally {
             setSubmittingComplaint(false);
         }
+    };
+
+    // ==========================================
+    // QR IMAGE URL
+    // ==========================================
+
+    const getQrImageUrl = () => {
+        if (!dustbin) {
+            return "";
+        }
+
+        // Prefer complete QR URL from backend
+        if (
+            dustbin.qr_code_url &&
+            dustbin.qr_code_url.startsWith("http")
+        ) {
+            return dustbin.qr_code_url;
+        }
+
+        // If qr_code is already a complete URL
+        if (
+            dustbin.qr_code &&
+            dustbin.qr_code.startsWith("http")
+        ) {
+            return dustbin.qr_code;
+        }
+
+        // If backend returns relative media path
+        if (dustbin.qr_code) {
+            return `${BASEURL}${dustbin.qr_code.startsWith("/") ? "" : "/"}${dustbin.qr_code}`;
+        }
+
+        return "";
     };
 
     // ==========================================
@@ -924,7 +460,10 @@ function DustbinDetails() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+                            {/* BIN ID */}
+
                             <div className="bg-gray-50 rounded-xl p-4">
+
                                 <p className="text-sm text-gray-500">
                                     BIN ID
                                 </p>
@@ -932,9 +471,13 @@ function DustbinDetails() {
                                 <p className="font-bold text-green-700 mt-1">
                                     {dustbin.bin_id}
                                 </p>
+
                             </div>
 
+                            {/* TYPE */}
+
                             <div className="bg-gray-50 rounded-xl p-4">
+
                                 <p className="text-sm text-gray-500">
                                     Waste Type
                                 </p>
@@ -942,9 +485,13 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     {dustbin.dustbin_type}
                                 </p>
+
                             </div>
 
+                            {/* ADDRESS */}
+
                             <div className="bg-gray-50 rounded-xl p-4 md:col-span-2">
+
                                 <p className="text-sm text-gray-500">
                                     Address
                                 </p>
@@ -952,9 +499,13 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     📍 {dustbin.address}
                                 </p>
+
                             </div>
 
+                            {/* LATITUDE */}
+
                             <div className="bg-gray-50 rounded-xl p-4">
+
                                 <p className="text-sm text-gray-500">
                                     Latitude
                                 </p>
@@ -962,9 +513,13 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     {dustbin.latitude}
                                 </p>
+
                             </div>
 
+                            {/* LONGITUDE */}
+
                             <div className="bg-gray-50 rounded-xl p-4">
+
                                 <p className="text-sm text-gray-500">
                                     Longitude
                                 </p>
@@ -972,9 +527,13 @@ function DustbinDetails() {
                                 <p className="font-semibold text-gray-800 mt-1">
                                     {dustbin.longitude}
                                 </p>
+
                             </div>
 
+                            {/* PRIORITY */}
+
                             <div className="bg-gray-50 rounded-xl p-4">
+
                                 <p className="text-sm text-gray-500">
                                     Priority Level
                                 </p>
@@ -988,9 +547,13 @@ function DustbinDetails() {
                                 >
                                     {dustbin.priority_level}
                                 </p>
+
                             </div>
 
+                            {/* PRIORITY SCORE */}
+
                             <div className="bg-gray-50 rounded-xl p-4">
+
                                 <p className="text-sm text-gray-500">
                                     Priority Score
                                 </p>
@@ -1004,6 +567,7 @@ function DustbinDetails() {
                                 >
                                     {dustbin.priority_score}
                                 </p>
+
                             </div>
 
                         </div>
@@ -1102,9 +666,11 @@ function DustbinDetails() {
 
                         </div>
 
-                        {/* QR CODE */}
+                        {/* ==========================================
+                            QR CODE
+                        ========================================== */}
 
-                        {dustbin.qr_code && (
+                        {getQrImageUrl() && (
 
                             <div className="mt-8 text-center border-t pt-8">
 
@@ -1113,10 +679,20 @@ function DustbinDetails() {
                                 </h3>
 
                                 <img
-                                    src={dustbin.qr_code}
+                                    src={getQrImageUrl()}
                                     alt={`QR Code for ${dustbin.bin_id}`}
-                                    className="w-48 h-48 mx-auto border rounded-xl p-2"
+                                    className="w-48 h-48 mx-auto border rounded-xl p-2 object-contain bg-white"
+                                    onError={(e) => {
+                                        console.error(
+                                            "QR image failed to load:",
+                                            e.currentTarget.src
+                                        );
+                                    }}
                                 />
+
+                                <p className="text-sm text-gray-500 mt-3">
+                                    Scan to view dustbin details
+                                </p>
 
                             </div>
 
