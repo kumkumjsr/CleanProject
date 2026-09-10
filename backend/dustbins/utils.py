@@ -16,10 +16,10 @@ def generate_dustbin_qr(dustbin):
     """
 
     frontend_url = getattr(
-        settings,
-        "FRONTEND_URL",
-        "http://localhost:5173"
-    ).rstrip("/")
+    settings,
+    "FRONTEND_URL",
+    "https://cleanprojest.netlify.app"
+).rstrip("/")
 
     qr_url = f"{frontend_url}/dustbin/{dustbin.bin_id}"
 

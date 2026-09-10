@@ -260,7 +260,7 @@ CORS_ALLOWED_ORIGINS = [
 
     "http://127.0.0.1:5173",
 
-    "http://192.168.31.116:5173",
+    "https://cleanprojest.netlify.app",
 
     # Production - Netlify
     "https://cleanprojest.netlify.app",
@@ -273,7 +273,7 @@ CORS_ALLOWED_ORIGINS = [
 
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
-    "http://192.168.31.116:5173",
+    "https://cleanprojest.netlify.app",
 )
 
 
